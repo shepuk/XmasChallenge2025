@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Naughty or Nice Password Game</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    /* Custom Shake Animation */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+      20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+    .shake-animation {
+      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    /* Smooth transition for rule appearance */
+    .rule-item {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    .rule-item.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-red-100 to-green-100 flex items-center justify-center p-4 font-sans">
+
+    <div class="absolute z-10 top-2 left-2">
+        <a href="index.html" class="text-sm p-2 text-red-400">Go Back</a>
+    </div>
+  
+  <div class="w-full max-w-2xl flex flex-col max-h-screen">
+    <div class="text-center mb-6 pt-6 shrink-0">
+      <h1 class="text-4xl font-extrabold text-red-700 drop-shadow-sm mb-2">
+        🎄 North Pole Security 🎄
+      </h1>
+      <p class="text-red-900 opacity-80 font-medium">
+        Santa's I.T. department has gone too far.
+      </p>
+    </div>
+
+    <div class="bg-white shadow-2xl rounded-2xl overflow-hidden border-4 border-red-100 relative flex flex-col shrink min-h-0">
+      
+      <div class="p-6 bg-white z-20 shadow-sm shrink-0">
+        <label class="block text-gray-700 font-bold mb-2 text-sm uppercase tracking-wide flex justify-between">
+          <span>Choose a Password</span>
+          <span id="lengthDisplay" class="text-gray-400 font-normal normal-case">Length: 0</span>
+        </label>
+        <div class="relative">
+          <input 
+            id="password"
+            type="text" 
+            placeholder="Type here..." 
+            class="w-full px-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all font-mono"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div id="scrollContainer" class="bg-gray-50 border-t border-gray-100 p-6 overflow-y-auto flex-1 scroll-smooth">
+        <div id="rules" class="space-y-3 pb-8">
+          </div>
+        
+        <button onClick="revealAnswer()" id="success" class="hidden w-full cursor-pointer mt-8 p-8 bg-green-100 rounded-xl border-2 border-green-200 text-center animate-bounce shadow-lg">
+          <div class="text-5xl mb-4">🎅🎁✅</div>
+          <h2 class="text-3xl font-bold text-green-800 mb-2">Access Granted!</h2>
+          <p class="text-green-700 font-semibold text-lg">You have survived the bureaucracy of the North Pole.</p>
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div id="clueModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-60 modal-overlay transition-opacity duration-300">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 text-center transform scale-95 transition-transform duration-300" id="modalContent">
+      <div class="text-6xl mb-6">🔑</div>
+      <h2 class="text-3xl font-extrabold text-red-700 mb-3">Your Clue</h2>
+      <p class="text-gray-700 mb-6 text-lg font-semibold">
+        Congratulations! You will find an envelope in the following location:
+      </p>
+      
+      <div class="p-4 bg-red-100 border-4 border-red-500 rounded-lg text-2xl font-mono font-bold text-red-800 tracking-wider mb-8">
+        HALLWAY BATTERY SACK
+      </div>
+      
+      <a href="index.html" class="inline-block px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors">
+        Go Back to the Main Page
+      </a>
+    </div>
+  </div>
+
+</body>
+<script>
+/* ────────────────────────────────────────────────────────────────
+    MODAL FUNCTION
+   ──────────────────────────────────────────────────────────────── */
+const clueModal = document.getElementById('clueModal');
+const modalContent = document.getElementById('modalContent');
+
+const revealAnswer = () => {
+    clueModal.classList.remove('hidden');
+    // Optional: Add a subtle animation when the modal appears
+    setTimeout(() => {
+        modalContent.classList.remove('scale-95');
+    }, 10);
+}
+
+/* ────────────────────────────────────────────────────────────────
+    THE RULES CONFIGURATION
+   ──────────────────────────────────────────────────────────────── */
+const rules = [
+  // BASICS
+  { id: 1, text: "Password must start with a capital letter.", validator: (pw) => /^[A-Z]/.test(pw) },
+  { id: 2, text: "Must contain uppercase and lowercase letters.", validator: (pw) => /[A-Z]/.test(pw) && /[a-z]/.test(pw) },
+  { id: 3, text: "Must be at least 12 characters long.", validator: (pw) => pw.length >= 12 },
+  { id: 4, text: "Must contain at least 2 numbers.", validator: (pw) => (pw.match(/\d/g) || []).length >= 2 },
+  
+  // THE NEW MATH TRAP
+  { id: 5, text: "The sum of all numbers must equal 25.", validator: sumOfDigitsEquals25 },
+
+  // THE CHRISTMAS SPIRIT
+  { id: 6, text: "Must contain a winter word: Snow, Bell, Ice, Santa, or Elf.", validator: (pw) => /Snow|Bell|Ice|Santa|Elf/i.test(pw) },
+  { id: 7, text: "Must include a Christmas Tree 🎄 or Gift 🎁 emoji.", validator: (pw) => /🎄|🎁/.test(pw) },
+  
+  // MATH & NUMBERS
+  { id: 8, text: "Must contain a Roman Numeral.", validator: containsRomanNumeral },
+  { id: 9, text: "The Roman Numerals must multiply to 35.", validator: romanNumeralsMultiplyTo35 },
+  { id: 10, text: "Must include 3 digits adjacent to each other that add up to 17 (e.g. 980).", validator: threeAdjacentDigitsSum17 },
+  { id: 11, text: "Must contain a negative number.", validator: (pw) => /-\d+/.test(pw) },
+  { id: 12, text: "Must include a 4-digit Leap Year.", validator: containsLeapYear },
+
+  // ANNOYINGLY SPECIFIC
+  { id: 13, text: "Must contain the letter 'Z' exactly 3 times.", validator: (pw) => (pw.match(/Z/gi) || []).length === 3 },
+  { id: 14, text: "The letter 'Z' may not touch another 'Z' (Social distancing).", validator: (pw) => !/zz/i.test(pw) },
+  { id: 15, text: "Must include a month of the year.", validator: includesMonth },
+  
+  // EXTERNAL KNOWLEDGE / FUNNY
+  { id: 16, text: "Must include the name of a pasta shape (e.g. Penne, Fusilli).", validator: containsPasta },
+  { id: 17, text: "Must include the freezing point of water in Fahrenheit.", validator: (pw) => /32/.test(pw) },
+  { id: 18, text: "Must include the 2-letter internet country code for Christmas Island in lower case.", validator: (pw) => /cx/.test(pw) },
+  { id: 19, text: "Must include the name of one of the Seven Dwarfs.", validator: containsDwarf },
+  { id: 20, text: "Must include today's Wordle solution.", validator: containsWordleSolution },
+  
+  // THE BOSS FIGHT
+  { id: 21, text: "The total length of your password must be a Prime Number.", validator: isPrimeLength },
+  { id: 22, text: "The password must begin and end with the same letter, but that letter cannot appear anywhere else.", validator: sameStartEndLetterOnly }
+];
+
+/* ────────────────────────────────────────────────────────────────
+    HELPER LOGIC FUNCTIONS
+   ──────────────────────────────────────────────────────────────── */
+
+// 1. SUM OF 25 LOGIC (New Rule)
+function sumOfDigitsEquals25(pw) {
+  let tempPw = pw;
+  let sum = 0;
+
+  // Step A: Find negative numbers (e.g. -5), add their value, and remove them
+  const negatives = tempPw.match(/-\d+/g) || [];
+  negatives.forEach(n => {
+    sum += parseInt(n); // Adds -5 to sum
+    tempPw = tempPw.replace(n, ''); // Remove it so digits aren't counted twice
+  });
+
+  // Step B: Find remaining positive digits (e.g. 2, 0, 2, 4)
+  const digits = tempPw.match(/\d/g) || [];
+  digits.forEach(d => {
+    sum += parseInt(d);
+  });
+
+  return sum === 25;
+}
+
+// Roman Numeral Logic
+function extractRomanNumerals(str) {
+  return str.match(/[IVXLCDM]+/g) || [];
+}
+
+function romanToInt(roman) {
+  const map = {I:1, V:5, X:10, L:50, C:100, D:500, M:1000};
+  let total = 0;
+  for (let i = 0; i < roman.length; i++) {
+    let curr = map[roman[i]];
+    let next = map[roman[i + 1]];
+    if (next && next > curr) { total -= curr; } else { total += curr; }
+  }
+  return total;
+}
+
+function containsRomanNumeral(pw) { return /[IVXLCDM]/.test(pw); }
+
+function romanNumeralsMultiplyTo35(pw) {
+  const matches = extractRomanNumerals(pw);
+  if (!matches.length) return false;
+  const product = matches.reduce((acc, numeral) => acc * romanToInt(numeral), 1);
+  return product === 35;
+}
+
+// Math Helpers
+function threeAdjacentDigitsSum17(pw) {
+  for (let i = 0; i < pw.length - 2; i++) {
+    const slice = pw.slice(i, i + 3);
+    if (/\d{3}/.test(slice)) {
+      const sum = parseInt(slice[0]) + parseInt(slice[1]) + parseInt(slice[2]);
+      if (sum === 17) return true;
+    }
+  }
+  return false;
+}
+
+function containsLeapYear(pw) {
+  const years = pw.match(/\d{4}/g);
+  if (!years) return false;
+  return years.some(y => {
+    const year = parseInt(y);
+    return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+  });
+}
+
+function isPrimeLength(pw) {
+  const n = pw.length;
+  if (n <= 1) return false;
+  for (let i = 2; i <= Math.sqrt(n); i++) {
+    if (n % i === 0) return false;
+  }
+  return true;
+}
+
+// Lists
+function includesMonth(pw) {
+  const months = ["january","february","march","april","may","june","july","august","september","october","november","december"];
+  return months.some(m => pw.toLowerCase().includes(m));
+}
+
+function containsPasta(pw) {
+  const pastas = ["spaghetti", "penne", "fusilli", "linguine", "ravioli", "macaroni", "fettuccine", "lasagna", "rigatoni", "farfalle", "gnocchi"];
+  return pastas.some(p => pw.toLowerCase().includes(p));
+}
+
+function containsDwarf(pw) {
+  const dwarfs = ["doc", "grumpy", "happy", "sleepy", "bashful", "sneezy", "dopey"];
+  return dwarfs.some(d => pw.toLowerCase().includes(d));
+}
+
+function containsWordleSolution(pw) {
+    // --- IMPORTANT: The puzzle will use these hardcoded solutions based on the computer's date. ---
+    const wordleMap = {
+        "2025-12-09": "SNIDE", 
+        
+        // NEW CHRISTMAS SOLUTIONS
+        "2025-12-25": "PRISM", // Christmas Day Solution
+        "2025-12-26": "SPEED", // Boxing Day Solution
+        "2025-12-27": "BATCH", // Day after Boxing Day Solution
+    };
+    
+    // Get today's date string in YYYY-MM-DD format
+    const today = new Date();
+    const YYYY = today.getFullYear();
+    const MM = String(today.getMonth() + 1).padStart(2, '0');
+    const DD = String(today.getDate()).padStart(2, '0');
+    const dateString = `${YYYY}-${MM}-${DD}`;
+
+    // Get the correct solution for the day, or use ZESTY if the date is missed.
+    const solution = wordleMap[dateString] || "ZESTY"; 
+
+    return pw.toLowerCase().includes(solution.toLowerCase());
+}
+
+// Start/End Constraints
+function sameStartEndLetterOnly(pw) {
+  if (pw.length < 2) return false;
+  const first = pw[0];
+  const last = pw[pw.length - 1];
+  
+  if (!/[a-z]/i.test(first)) return false; 
+  if (first.toLowerCase() !== last.toLowerCase()) return false;
+
+  const middle = pw.slice(1, -1).toLowerCase();
+  return !middle.includes(first.toLowerCase());
+}
+
+/* ────────────────────────────────────────────────────────────────
+    RENDER & EVENT LOOP
+   ──────────────────────────────────────────────────────────────── */
+
+let visibleRuleCount = 1;
+let wordleSolutionCache = null;
+const passwordInput = document.getElementById('password');
+const rulesContainer = document.getElementById('rules');
+const successDiv = document.getElementById('success');
+const scrollContainer = document.getElementById('scrollContainer');
+const lengthDisplay = document.getElementById('lengthDisplay');
+
+function renderRules() {
+  const pw = passwordInput.value;
+  let allVisiblePassed = true;
+
+  rulesContainer.innerHTML = '';
+
+  for (let i = 0; i < visibleRuleCount; i++) {
+    const rule = rules[i];
+    const isPassed = rule.validator(pw);
+    
+    // CURRENT SUM DISPLAY (Only for rule 5, and only if it's failing)
+    let extraInfo = "";
+    if (rule.id === 5 && !isPassed) {
+       // Calculate current sum for hint
+       let tempPw = pw;
+       let sum = 0;
+       (tempPw.match(/-\d+/g) || []).forEach(n => { sum += parseInt(n); tempPw = tempPw.replace(n, ''); });
+       (tempPw.match(/\d/g) || []).forEach(d => sum += parseInt(d));
+       extraInfo = ` <span class="text-xs font-bold uppercase ml-2 bg-red-100 text-red-700 px-2 py-1 rounded">Current Sum: ${sum}</span>`;
+    }
+
+    const div = document.createElement('div');
+    div.id = `rule-${i}`;
+    div.className = `rule-item visible p-3 rounded-lg border flex items-center shadow-sm text-sm md:text-base ${
+      isPassed 
+        ? 'bg-green-50 border-green-200 text-green-800' 
+        : 'bg-red-50 border-red-200 text-red-800 font-semibold'
+    }`;
+    
+    div.innerHTML = `
+      <span class="text-xl mr-3 shrink-0">${isPassed ? '✅' : '❌'}</span>
+      <div class="flex-1">
+        <span>${rule.text}</span>
+        ${extraInfo}
+      </div>
+    `;
+    
+    if (!isPassed) {
+       allVisiblePassed = false;
+    }
+
+    rulesContainer.appendChild(div);
+  }
+
+  // Check progression
+  if (allVisiblePassed) {
+    if (visibleRuleCount < rules.length) {
+      visibleRuleCount++;
+      renderRules(); 
+      setTimeout(() => { scrollContainer.scrollTop = scrollContainer.scrollHeight; }, 100);
+    } else {
+      successDiv.classList.remove('hidden');
+      passwordInput.disabled = true;
+      passwordInput.classList.add('bg-green-50', 'text-green-900');
+      setTimeout(() => { scrollContainer.scrollTop = scrollContainer.scrollHeight; }, 100);
+    }
+  } else {
+    successDiv.classList.add('hidden');
+  }
+}
+
+passwordInput.addEventListener('input', (e) => {
+  lengthDisplay.textContent = `Length: ${e.target.value.length}`;
+  renderRules();
+});
+
+renderRules();
+
+</script>
+</body>
+</html>

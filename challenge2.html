@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>North Pole Consent Gauntlet</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    .tiny-close { font-size: 10px; padding: 2px 4px; line-height: 1; }
+    .move-on-hover:hover { transform: translateX(120px) translateY(-10px); }
+    .no-select { user-select: none; }
+
+    @keyframes wobble {
+      0%,100% { transform: rotate(0deg); }
+      25% { transform: rotate(1deg); }
+      75% { transform: rotate(-1deg); }
+    }
+    .wobble { animation: wobble 0.35s infinite; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+      20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+    .shake { animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both; }
+
+    .modal-backdrop { background: rgba(0,0,0,.6); }
+
+    /* make scrollbars obnoxious but visible */
+    .scrollbox::-webkit-scrollbar { width: 14px; }
+    .scrollbox::-webkit-scrollbar-thumb { background: #ef4444; border-radius: 10px; }
+    .scrollbox::-webkit-scrollbar-track { background: #fee2e2; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-green-100 to-red-100 flex items-center justify-center p-6 font-sans">
+
+  <div class="absolute z-10 top-2 left-2">
+    <a href="index.html" class="text-sm p-2 text-red-400">Go Back</a>
+  </div>
+
+  <div class="w-full max-w-2xl">
+    <div class="text-center mb-6">
+      <h1 class="text-4xl font-extrabold text-red-700 drop-shadow-sm mb-2">🎄 North Pole Consent Experience 🎄</h1>
+      <p class="text-red-900 opacity-80 font-medium">Legal, Marketing, and Security collaborated. Everyone lost.</p>
+    </div>
+
+    <div class="bg-white shadow-2xl rounded-2xl overflow-hidden border-4 border-red-100 p-8 relative">
+      <div class="flex items-center justify-between gap-4 mb-4">
+        <div class="text-sm font-semibold text-gray-700">
+          Progress <span id="progressText" class="text-gray-400 font-normal">(estimated)</span>
+        </div>
+
+        <!-- This progress bar lies on purpose -->
+        <div class="w-1/2 bg-gray-100 rounded-full overflow-hidden border">
+          <div id="progressBar" class="h-3 bg-green-500" style="width: 12%"></div>
+        </div>
+      </div>
+
+      <p class="text-gray-700 mb-6">
+        Close all required popups to continue. (You cannot. But you can try.)
+      </p>
+
+      <button id="startBtn" class="w-full px-6 py-4 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition">
+        Begin Compliance
+      </button>
+
+      <div id="status" class="mt-5 text-sm text-gray-500"></div>
+    </div>
+  </div>
+
+  <!-- COOKIE BANNER -->
+  <div id="cookieBanner" class="hidden fixed bottom-4 left-4 right-4 md:left-8 md:right-auto bg-white border-4 border-red-300 shadow-xl rounded-xl p-5 max-w-xl z-40">
+    <div class="flex items-start justify-between gap-2">
+      <div>
+        <h2 class="font-bold text-lg mb-1">🍪 Cookies!</h2>
+        <p class="text-sm text-gray-700 mb-3">
+          We use cookies to improve your Christmas experience, track your cheer, and optimize elf efficiency.
+        </p>
+      </div>
+      <button id="cookieFakeClose" class="tiny-close text-gray-300 border border-gray-200 rounded">x</button>
+    </div>
+
+    <div class="flex flex-wrap gap-2 items-center">
+      <button id="cookieAccept" class="px-4 py-2 bg-red-500 text-white rounded-lg font-bold">
+        Accept All
+      </button>
+      <button id="cookieOptions" class="px-4 py-2 bg-gray-100 rounded-lg font-semibold border">
+        Options
+      </button>
+
+      <button id="cookieReject" class="px-4 py-2 bg-gray-200 rounded-lg font-semibold border opacity-40 cursor-not-allowed" disabled>
+        Reject All
+      </button>
+
+      <span class="text-xs text-gray-400 ml-auto">“Reject” requires Premium</span>
+    </div>
+  </div>
+
+  <!-- COOKIE OPTIONS "NEW WINDOW" -->
+  <div id="cookieWindow" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full border-4 border-red-200 relative">
+      <!-- Fake title bar -->
+      <div class="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
+        <div class="text-sm font-bold text-gray-700">Cookie Options (New Window)</div>
+        <div class="flex items-center gap-2">
+          <button class="tiny-close text-gray-300 border border-gray-200 rounded">–</button>
+          <button class="tiny-close text-gray-300 border border-gray-200 rounded">□</button>
+          <button id="cookieWindowClose" class="tiny-close text-gray-300 border border-gray-200 rounded">x</button>
+        </div>
+      </div>
+
+      <div class="p-5">
+        <p class="text-sm text-gray-700 mb-3">
+          Please review the following categories. There are only… <span class="font-bold text-red-600">a few</span>.
+        </p>
+
+        <div id="cookieScroll" class="scrollbox h-56 overflow-y-auto border rounded-lg p-3 text-xs text-gray-700 bg-gray-50">
+          <!-- Filler categories -->
+          <div class="space-y-2">
+            <div class="p-2 bg-white border rounded flex items-center justify-between">
+              <div>
+                <div class="font-bold">Strictly Necessary</div>
+                <div class="text-gray-500">Required to deliver guilt.</div>
+              </div>
+              <input type="checkbox" checked disabled>
+            </div>
+
+            <div class="p-2 bg-white border rounded flex items-center justify-between">
+              <div>
+                <div class="font-bold">Performance</div>
+                <div class="text-gray-500">Measures how quickly your patience decays.</div>
+              </div>
+              <input class="cookie-toggle" type="checkbox" checked>
+            </div>
+
+            <div class="p-2 bg-white border rounded flex items-center justify-between">
+              <div>
+                <div class="font-bold">Marketing</div>
+                <div class="text-gray-500">Allows us to email you at 03:00.</div>
+              </div>
+              <input class="cookie-toggle" type="checkbox" checked>
+            </div>
+
+            <div class="p-2 bg-white border rounded flex items-center justify-between">
+              <div>
+                <div class="font-bold">Elf Analytics</div>
+                <div class="text-gray-500">Tracks mouse movement to detect joy.</div>
+              </div>
+              <input class="cookie-toggle" type="checkbox" checked>
+            </div>
+
+            <!-- Just… lots more -->
+            <div id="cookieMore" class="space-y-2"></div>
+
+            <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded">
+              <div class="font-bold text-red-700">Important:</div>
+              <div>To enable “Save Preferences”, scroll to the very bottom and confirm you don't value privacy.</div>
+            </div>
+
+            <div class="mt-3 p-2 bg-white border rounded">
+              <label class="flex items-center gap-2 text-[11px] text-gray-700">
+                <input id="privacySurrender" type="checkbox" class="w-3 h-3">
+                I agree my preferences may be ignored “for performance reasons”.
+              </label>
+            </div>
+
+            <div class="h-6"></div>
+            <div class="text-center text-gray-400">✅ End of the internet</div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mt-4">
+          <button id="cookieSave" class="px-4 py-2 bg-green-600 text-white rounded-lg font-bold opacity-40 cursor-not-allowed" disabled>
+            Save Preferences
+          </button>
+          <button id="cookieSaveAnyway" class="px-4 py-2 bg-gray-100 rounded-lg font-semibold border">
+            Save Anyway (does nothing)
+          </button>
+
+          <div class="ml-auto text-xs text-gray-400 flex items-center gap-2">
+            <span id="cookieHint">Tip: scrolling helps.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFER POPUP TEMPLATE AREA -->
+  <div id="offerLayer" class="fixed inset-0 z-50 pointer-events-none"></div>
+
+  <!-- NEWSLETTER -->
+  <div id="newsletter" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-xl p-8 max-w-md w-full text-center relative border-4 border-red-200">
+      <button id="newsletterClose" class="absolute top-1 right-1 tiny-close text-gray-300 border border-gray-200 rounded">x</button>
+
+      <h2 class="text-2xl font-extrabold text-red-700 mb-2">🎁 Join Our Newsletter</h2>
+      <p class="mb-5 text-gray-700">
+        Daily festive emails. Hourly reminders. Occasional guilt.
+      </p>
+
+      <input id="emailInput" type="email" placeholder="you@northpole.com"
+        class="w-full mb-3 px-4 py-3 border-2 rounded-lg">
+
+      <div class="text-xs text-gray-500 mb-4">
+        By subscribing you agree to receive emails, push notifications, carrier pigeons, and vibes.
+      </div>
+
+      <div class="flex justify-between items-center gap-2">
+        <button id="subscribeBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg font-bold w-1/2">
+          Subscribe
+        </button>
+        <button id="noThanksBtn" class="move-on-hover transition-all px-4 py-2 bg-gray-200 rounded-lg w-1/2">
+          No thanks
+        </button>
+      </div>
+
+      <p id="emailError" class="mt-4 text-sm text-red-600 font-semibold hidden">
+        Please enter a real email (Santa checks).
+      </p>
+    </div>
+  </div>
+
+  <!-- TERMS -->
+  <div id="terms" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full border-4 border-red-200">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-xl font-bold">📜 Terms & Conditions</h2>
+        <button id="termsFakeClose" class="tiny-close text-gray-300 border border-gray-200 rounded">x</button>
+      </div>
+
+      <p class="text-sm text-gray-700 mb-3">
+        Please scroll to the end to enable “Accept”. (We know you won't read it. We respect the honesty.)
+      </p>
+
+      <div id="termsScroll" class="scrollbox h-60 overflow-y-auto text-xs border p-3 mb-4 bg-gray-50 rounded-lg">
+        <!-- Put your huge terms text here -->
+        <div class="space-y-2 text-gray-700">
+          <p><strong>North Pole Agreement v12.4</strong></p>
+          <p><strong>The Ultimate Festive Compliance & Joy-Standardization Agreement (v.2025.B)</strong></p>
+          <p id="tandcs">1. Acceptance and Agreement to Vague and Non-Binding Terms
+1.1. Preamble and Acknowledgment of Whimsy: By clicking the "I have scrolled to the bottom and have definitely read all of this (probably)" button (hereinafter referred to as the "Acceptance Mechanism"), you, the User (hereinafter referred to as "The Participant" or "The Challenged"), formally acknowledge and agree to be bound by these exhaustive, deliberately convoluted, and largely unenforceable Terms and Conditions (hereinafter referred to as "The T&C's"). These T&C's govern your access to and participation in the aforementioned Festive Fun Gauntlet (hereinafter referred to as "The Gauntlet"), a wholly non-commercial, highly subjective, and potentially counter-productive seasonal diversion conceived solely for the amusement of The Creator (hereinafter referred to as "The Benevolent Overlord").
+
+1.2. The Nature of the Agreement: The Challenged understands that this agreement is not a legal document in any meaningful sense. It is, instead, a digital monument to procrastination, intended solely to increase the duration of a necessary scroll operation. Any resemblance to actual, useful, or legally sound terms is purely coincidental and deeply regretted.
+
+2. The Gauntlet and Associated Disclaimers of Expectation
+2.1. Description of The Gauntlet: The Gauntlet is comprised of an undefined number of vaguely Christmas-themed micro-tasks, digital hurdles, pop-up nuisances, and cryptic instructions. The objective is to achieve a state of completion, the parameters of which are subject to unilateral, unannounced, and immediate alteration by The Benevolent Overlord. Completion may or may not result in a reward, which may or may not be proportionate to the effort expended.
+
+2.2. Disclaimer of Functionality: The Challenged acknowledges that the website, its systems, and all associated programming (if any) are provided on an "as is, with all faults, and possibly with a lingering scent of gingerbread" basis. The Benevolent Overlord makes no warranties, expressed or implied, regarding uptime, clarity, logical coherence, or fitness for any particular purpose, including the purpose of being a fun challenge. Expect instability, sudden re-routings, and non-sequitur error messages.
+
+2.3. The Pop-Up Clause (Crucial Annoyance Section): The Challenged explicitly consents to the persistent, aggressive, and contextually inappropriate deployment of intrusive pop-up windows. These pop-ups are a fundamental feature of The Gauntlet, not a bug, and serve to test The Challenged’s patience and mouse-handling dexterity. Attempts to block, circumvent, or verbally abuse the pop-ups are considered a form of cheating and may result in the automatic deployment of a further, more irritating pop-up.
+
+3. Intellectual Property, Ephemeral Data, and General Confusion
+3.1. Ownership of Everything Vaguely Related: All textual content, questionable design choices, pixelated imagery, and underlying logic (or lack thereof) are the exclusive, albeit tenuous, property of The Benevolent Overlord. The Challenged is granted a non-exclusive, non-transferable, non-sensical license to temporarily view and interact with the content, provided they remain in a state of mild exasperation.
+
+3.2. Data Retention Policy (The Cookie Crumbs): By proceeding, The Challenged agrees to the deployment of "Festive Tracking Cookies." These cookies do not track your digital movements but are, in fact, small, fictional data packets that simply record how many times you have sighed loudly while scrolling. This data is not shared with any third party, largely because no third party would ever want it.
+
+3.3. The "Prize" and Its Abstract Nature: If, against all statistical probability and the stated intent of The Benevolent Overlord, The Challenged successfully navigates The Gauntlet, the nature of the "prize" is understood to be entirely flexible. It may take the form of a physical object, a shared experience, a temporary reprieve from washing up duties, or perhaps simply the profound satisfaction of having humoured the creator. Monetary substitution is expressly forbidden, unless such substitution is deemed necessary by The Benevolent Overlord to purchase additional tinsel.
+
+4. Indemnification and Future Amendments
+4.1. Release from Liability for Grumbling: The Challenged agrees to indemnify, defend, and hold harmless The Benevolent Overlord from and against any and all claims, damages, losses, liabilities, and expenses (including, but not limited to, loss of precious time and a marginal rise in blood pressure) arising out of or in connection with The Challenged's participation in The Gauntlet. Grumbling is permitted, but only in low, theatrical tones.
+
+4.2. Governing Law and Arbitrary Rule Changes: This agreement shall be governed by and construed in accordance with the Laws of Vague Suggestions and Seasonal Goodwill. The Benevolent Overlord reserves the right to amend, suspend, or terminate these T&C's at any time, for any reason, or for no reason at all, by simply thinking about the changes. Such amendments shall be effective immediately upon being silently contemplated. The onus is on The Challenged to telepathically discern the updated terms.
+
+5. Final Declarations and Scroll Confirmation
+5.1. Severability: If any part of these T&C's is found to be utterly nonsensical, unreasonably lengthy, or patently ridiculous by any recognised authority (including a highly caffeinated cat), the remaining portions shall nevertheless remain in full force and effect, preserving the general atmosphere of bureaucratic silliness.
+
+5.2. Confirmation: By reaching this point and activating the Acceptance Mechanism, The Challenged warrants that they possess a functional scroll wheel (or equivalent finger dexterity), understand that Christmas is primarily about light-hearted torment, and fully accept that they have just wasted several minutes of their life reading this. Good luck. You’ll need it.</p>
+          <div id="termsBottomMarker" class="mt-6 p-2 bg-white border rounded text-center text-gray-500">
+            ✅ End of Terms
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 mb-3">
+        <input id="termsCheckbox" type="checkbox" class="w-3 h-3">
+        <label for="termsCheckbox" class="text-xs text-gray-600">
+          I have read every word, twice, with joy.
+        </label>
+      </div>
+
+      <button id="termsAccept" class="px-4 py-3 bg-red-500 text-white rounded-lg font-bold w-full opacity-40 cursor-not-allowed" disabled>
+        Accept & Continue
+      </button>
+
+      <p id="termsHint" class="mt-2 text-xs text-gray-400">
+        Hint: scroll. Also check the tiny box. Also surrender.
+      </p>
+    </div>
+  </div>
+
+  <!-- CAPTCHA -->
+  <div id="captcha" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-xl p-8 max-w-lg w-full text-center border-4 border-red-200">
+      <h2 class="text-xl font-extrabold mb-2">🤖 Prove You're Not a Festive Robot</h2>
+      <p class="mb-5 text-gray-700">
+        Select all tiles containing <strong>Christmas Spirit</strong>.
+        <span class="text-xs text-gray-400">(It’s subjective.)</span>
+      </p>
+
+      <div id="captchaGrid" class="grid grid-cols-3 gap-2 mb-4 text-sm no-select"></div>
+
+      <button id="captchaVerify" class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg w-full opacity-40 cursor-not-allowed" disabled>
+        Verify
+      </button>
+
+      <p id="captchaMsg" class="mt-3 text-sm text-red-600 font-semibold hidden">
+        Incorrect. Also somehow offensive.
+      </p>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="success" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-green-900 bg-opacity-80">
+    <div class="bg-white rounded-xl p-10 text-center max-w-lg border-4 border-green-200">
+      <div class="text-6xl mb-4">🎉</div>
+      <h2 class="text-3xl font-extrabold text-green-700 mb-2">Compliance Complete</h2>
+      <p class="text-gray-700 mb-6">
+        Thank you for accepting everything forever.
+      </p>
+      <a href="index.html" class="px-6 py-3 bg-green-600 text-white rounded-lg font-bold">
+        Return to Main Page
+      </a>
+    </div>
+  </div>
+
+<script>
+  // ────────────────────────────────────────────────────────────────
+  // State + helpers
+  // ────────────────────────────────────────────────────────────────
+  const steps = {
+    cookiesDone: false,
+    newsletterDone: false,
+    termsDone: false,
+    offersDone: false,
+    captchaDone: false,
+  };
+
+  const status = document.getElementById('status');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+
+  const TandC = document.getElementById('tandcs');
+  let text = TandC.textContent.trim();
+  TandC.textContent = (text + ' ').repeat(100);
+
+  function lieProgress() {
+    // intentionally inaccurate
+    const base = 10
+      + (steps.cookiesDone ? 17 : 0)
+      + (steps.newsletterDone ? 14 : 0)
+      + (steps.termsDone ? 18 : 0)
+      + (steps.offersDone ? 22 : 0)
+      + (steps.captchaDone ? 19 : 0);
+
+    // make it wobble a bit
+    const wobble = Math.floor(Math.random() * 7) - 3;
+    const pct = Math.max(6, Math.min(99, base + wobble));
+
+    progressBar.style.width = pct + '%';
+    progressText.textContent = `(estimated ${pct}% — confidence low)`;
+  }
+
+  function setStatus(msg, naughty=false) {
+    status.textContent = msg;
+    status.className = "mt-5 text-sm " + (naughty ? "text-red-600 font-semibold" : "text-gray-500");
+    lieProgress();
+  }
+
+  function show(id) { document.getElementById(id).classList.remove('hidden'); }
+  function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+  function randomPos(el) {
+    const pad = 20;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const x = Math.max(pad, Math.floor(Math.random() * (w - pad*2 - 320)));
+    const y = Math.max(pad, Math.floor(Math.random() * (h - pad*2 - 200)));
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+  }
+
+  // ────────────────────────────────────────────────────────────────
+  // Start
+  // ────────────────────────────────────────────────────────────────
+  document.getElementById('startBtn').addEventListener('click', () => {
+    setStatus("Step 1: Cookies. (The elves demand telemetry.)");
+    show('cookieBanner');
+
+    // generate lots of cookie categories to force scroll
+    const more = document.getElementById('cookieMore');
+    more.innerHTML = "";
+    const categories = [
+      "Seasonal Mood Tracking", "Reindeer Retargeting", "Sleigh Performance Metrics", "Hot Cocoa Attribution",
+      "Festive Fingerprinting", "Elf Engagement", "Naughty/Nice Profiling", "Stocking Personalization",
+      "Bauble Conversion", "Tinsel Optimization", "Jingle Frequency", "Coal Supply Forecasting"
+    ];
+    for (let i = 0; i < 24; i++) {
+      const name = categories[i % categories.length] + " #" + (i+1);
+      const div = document.createElement('div');
+      div.className = "p-2 bg-white border rounded flex items-center justify-between";
+      div.innerHTML = `
+        <div>
+          <div class="font-bold">${name}</div>
+          <div class="text-gray-500">Absolutely optional. (Not really.)</div>
+        </div>
+        <input class="cookie-toggle" type="checkbox" checked>
+      `;
+      more.appendChild(div);
+    }
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // Cookies
+  // ────────────────────────────────────────────────────────────────
+  const cookieFakeClose = document.getElementById('cookieFakeClose');
+  cookieFakeClose.addEventListener('click', () => {
+    cookieFakeClose.classList.add('shake');
+    setTimeout(() => cookieFakeClose.classList.remove('shake'), 380);
+    setStatus("Close button is decorative. Please consent properly.", true);
+  });
+
+  document.getElementById('cookieOptions').addEventListener('click', () => {
+    show('cookieWindow');
+    setStatus("Cookie Options opened in a new window. Congratulations.", true);
+  });
+
+  document.getElementById('cookieAccept').addEventListener('click', () => {
+    // accepting without options triggers options anyway
+    show('cookieWindow');
+    setStatus("You accepted. Now please configure 36 settings anyway.", true);
+  });
+
+  const cookieScroll = document.getElementById('cookieScroll');
+  const cookieSave = document.getElementById('cookieSave');
+  const privacySurrender = document.getElementById('privacySurrender');
+  const cookieHint = document.getElementById('cookieHint');
+
+  function updateCookieSaveState() {
+    const scrolledToBottom = (cookieScroll.scrollTop + cookieScroll.clientHeight) >= (cookieScroll.scrollHeight - 8);
+    const checked = privacySurrender.checked;
+
+    if (scrolledToBottom && checked) {
+      cookieSave.disabled = false;
+      cookieSave.classList.remove('opacity-40', 'cursor-not-allowed');
+      cookieHint.textContent = "Okay fine. You may save your doomed preferences.";
+    } else {
+      cookieSave.disabled = true;
+      cookieSave.classList.add('opacity-40', 'cursor-not-allowed');
+      cookieHint.textContent = scrolledToBottom ? "Now tick the tiny surrender checkbox." : "Scroll. Keep scrolling. Forever.";
+    }
+  }
+
+  cookieScroll.addEventListener('scroll', updateCookieSaveState);
+  privacySurrender.addEventListener('change', updateCookieSaveState);
+
+  document.getElementById('cookieSaveAnyway').addEventListener('click', () => {
+    setStatus("Saved anyway! (Nothing was saved.)", true);
+    cookieHint.textContent = "Try the other Save button. The real one. The strict one.";
+  });
+
+  document.getElementById('cookieWindowClose').addEventListener('click', () => {
+    setStatus("This window cannot be closed until preferences are saved.", true);
+  });
+
+  cookieSave.addEventListener('click', () => {
+    hide('cookieWindow');
+    hide('cookieBanner');
+    steps.cookiesDone = true;
+
+    // petty: flip one random toggle back on
+    const toggles = [...document.querySelectorAll('.cookie-toggle')];
+    if (toggles.length) toggles[Math.floor(Math.random() * toggles.length)].checked = true;
+
+    setStatus("Cookies configured. One preference was reset for performance.", true);
+
+    // Start offers before newsletter/terms
+    launchOffers();
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // Offers (multiple popups, different “rules”)
+  // ────────────────────────────────────────────────────────────────
+  const offerLayer = document.getElementById('offerLayer');
+  let offerAClosed = false;
+  let offerBClosed = false;
+  let offerCClicks = 0;
+
+  function makeOffer(html, extraClasses="") {
+    const wrap = document.createElement('div');
+    wrap.className = `pointer-events-auto fixed bg-white border-4 border-red-200 shadow-2xl rounded-xl p-4 w-[320px] ${extraClasses}`;
+    wrap.innerHTML = html;
+    randomPos(wrap);
+    offerLayer.appendChild(wrap);
+    return wrap;
+  }
+
+  function launchOffers() {
+    setStatus("Step 2: Special Offers. (You are the product.)", true);
+
+    // Offer A: close disabled until countdown ends
+    const offerA = makeOffer(`
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <div class="font-bold text-red-700">🎉 Limited Time Offer!</div>
+          <div class="text-xs text-gray-600">Wait for the timer to unlock the close button.</div>
+        </div>
+        <button class="tiny-close text-gray-300 border border-gray-200 rounded" data-offer="aClose" disabled>x</button>
+      </div>
+      <div class="mt-3 text-sm text-gray-700">
+        Claim <span class="font-bold">0% off</span> your next inconvenience.
+      </div>
+      <div class="mt-3 text-xs text-gray-500">Close unlocks in <span id="countA">5</span> seconds…</div>
+    `, "wobble");
+
+    // countdown logic
+    let t = 5;
+    const countEl = offerA.querySelector('#countA');
+    const closeBtn = offerA.querySelector('[data-offer="aClose"]');
+    const int = setInterval(() => {
+      t--;
+      countEl.textContent = t;
+      if (t <= 0) {
+        clearInterval(int);
+        closeBtn.disabled = false;
+        closeBtn.classList.remove('text-gray-300');
+        closeBtn.classList.add('text-gray-500');
+        countEl.textContent = "0";
+      }
+    }, 1000);
+
+    closeBtn.addEventListener('click', () => {
+      offerAClosed = true;
+      offerA.remove();
+      maybeFinishOffers();
+    });
+
+    // Offer B: fake close that shakes, real close is a tiny “dismiss” link
+    const offerB = makeOffer(`
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <div class="font-bold text-red-700">🧾 Update Required</div>
+          <div class="text-xs text-gray-600">Your joy is out of date.</div>
+        </div>
+        <button class="tiny-close text-gray-300 border border-gray-200 rounded" id="fakeCloseB">x</button>
+      </div>
+      <div class="mt-3 text-sm text-gray-700">
+        Please install "Festive Runtime Environment 12".
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <button class="px-3 py-2 bg-green-600 text-white rounded-lg font-bold">Install</button>
+        <button class="px-3 py-2 bg-gray-100 border rounded-lg font-semibold">Later</button>
+      </div>
+      <div class="mt-3 text-right">
+        <button class="text-[10px] text-gray-400 underline" id="realCloseB">dismiss quietly</button>
+      </div>
+    `);
+
+    offerB.querySelector('#fakeCloseB').addEventListener('click', () => {
+      offerB.classList.add('shake');
+      setTimeout(() => offerB.classList.remove('shake'), 380);
+      setStatus("That close button is only for decoration.", true);
+    });
+
+    offerB.querySelector('#realCloseB').addEventListener('click', () => {
+      offerBClosed = true;
+      offerB.remove();
+      maybeFinishOffers();
+    });
+
+    // Offer C: must click “Not interested” three times + button moves
+    const offerC = makeOffer(`
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <div class="font-bold text-red-700">🎁 Mystery Box</div>
+          <div class="text-xs text-gray-600">We respect your choices. Eventually.</div>
+        </div>
+        <button class="tiny-close text-gray-300 border border-gray-200 rounded" id="fakeCloseC">x</button>
+      </div>
+      <div class="mt-3 text-sm text-gray-700">
+        Click "Not interested" <span class="font-bold">3 times</span> to confirm you're serious.
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <button class="px-3 py-2 bg-red-500 text-white rounded-lg font-bold wobble" id="claimBtn">Claim</button>
+        <button class="px-3 py-2 bg-gray-100 border rounded-lg font-semibold transition-all" id="notInterestedBtn">Not interested (0/3)</button>
+      </div>
+      <div class="mt-2 text-[11px] text-gray-500">Tip: the "x" is fake. Obviously.</div>
+    `);
+
+    const notBtn = offerC.querySelector('#notInterestedBtn');
+    offerC.querySelector('#fakeCloseC').addEventListener('click', () => {
+      setStatus("Nope. Please provide 3 separate confirmations.", true);
+    });
+
+    notBtn.addEventListener('mouseenter', () => {
+      // small random dodge
+      const dx = Math.floor(Math.random() * 80) - 40;
+      const dy = Math.floor(Math.random() * 30) - 15;
+      notBtn.style.transform = `translate(${dx}px, ${dy}px)`;
+    });
+
+    notBtn.addEventListener('click', () => {
+      offerCClicks++;
+      notBtn.textContent = `Not interested (${offerCClicks}/3)`;
+      notBtn.style.transform = `translate(0px, 0px)`;
+
+      if (offerCClicks >= 3) {
+        offerC.remove();
+        maybeFinishOffers();
+      } else {
+        setStatus("We appreciate your feedback. Please repeat it.", true);
+      }
+    });
+  }
+
+  function maybeFinishOffers() {
+    if (!offerAClosed || !offerBClosed || offerCClicks < 3) return;
+
+    steps.offersDone = true;
+    setStatus("Offers cleared. You have declined happiness successfully.", true);
+
+    // Next: Newsletter
+    show('newsletter');
+    setStatus("Step 3: Newsletter. (You can never truly leave.)", true);
+  }
+
+  // ────────────────────────────────────────────────────────────────
+  // Newsletter gating
+  // ────────────────────────────────────────────────────────────────
+  const emailInput = document.getElementById('emailInput');
+  const emailError = document.getElementById('emailError');
+  const newsletterClose = document.getElementById('newsletterClose');
+  const noThanksBtn = document.getElementById('noThanksBtn');
+
+  newsletterClose.addEventListener('click', () => {
+    setStatus("Close button disabled by marketing.", true);
+    newsletterClose.classList.add('shake');
+    setTimeout(() => newsletterClose.classList.remove('shake'), 380);
+  });
+
+  noThanksBtn.addEventListener('click', () => {
+    setStatus("You tried to say no. That was adorable.", true);
+  });
+
+  document.getElementById('subscribeBtn').addEventListener('click', () => {
+    const val = emailInput.value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
+    if (!ok) {
+      emailError.classList.remove('hidden');
+      setStatus("Invalid email. Santa is disappointed.", true);
+      return;
+    }
+
+    emailError.classList.add('hidden');
+    hide('newsletter');
+    steps.newsletterDone = true;
+
+    // Next: Terms
+    show('terms');
+    setStatus("Step 4: Terms. Scroll. Suffer. Continue.", true);
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // Terms gating: scroll to bottom + checkbox
+  // ────────────────────────────────────────────────────────────────
+  const termsScroll = document.getElementById('termsScroll');
+  const termsAccept = document.getElementById('termsAccept');
+  const termsCheckbox = document.getElementById('termsCheckbox');
+
+  function updateTermsState() {
+    const scrolled = (termsScroll.scrollTop + termsScroll.clientHeight) >= (termsScroll.scrollHeight - 8);
+    const checked = termsCheckbox.checked;
+
+    if (scrolled && checked) {
+      termsAccept.disabled = false;
+      termsAccept.classList.remove('opacity-40', 'cursor-not-allowed');
+    } else {
+      termsAccept.disabled = true;
+      termsAccept.classList.add('opacity-40', 'cursor-not-allowed');
+    }
+  }
+
+  termsScroll.addEventListener('scroll', updateTermsState);
+  termsCheckbox.addEventListener('change', updateTermsState);
+
+  document.getElementById('termsFakeClose').addEventListener('click', () => {
+    setStatus("You cannot close Terms. Terms close you.", true);
+  });
+
+  termsAccept.addEventListener('click', () => {
+    hide('terms');
+    steps.termsDone = true;
+
+    // Next: CAPTCHA
+    show('captcha');
+    setStatus("Step 5: CAPTCHA. Festivity verification required.", true);
+    setupCaptcha();
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // CAPTCHA: must select correct tiles
+  // ────────────────────────────────────────────────────────────────
+  const captchaGrid = document.getElementById('captchaGrid');
+  const captchaVerify = document.getElementById('captchaVerify');
+  const captchaMsg = document.getElementById('captchaMsg');
+
+  // Choose a “correct” set: 🎄 🎁 ❄️ (and we’ll sprinkle decoys)
+  const tiles = ["🎄","🎁","❄️","☕","🧾","🪑","📦","🧦","🧯"];
+  const correct = new Set(["🎄","🎁","❄️"]);
+  const selected = new Set();
+
+  function setupCaptcha() {
+    captchaGrid.innerHTML = "";
+    selected.clear();
+    captchaMsg.classList.add('hidden');
+    captchaVerify.disabled = true;
+    captchaVerify.classList.add('opacity-40','cursor-not-allowed');
+
+    // shuffle tiles
+    const shuffled = [...tiles].sort(() => Math.random() - 0.5);
+
+    shuffled.forEach((emoji) => {
+      const btn = document.createElement('button');
+      btn.className = "p-6 border rounded-lg bg-gray-50 hover:bg-gray-100 transition font-bold text-xl";
+      btn.textContent = emoji;
+
+      btn.addEventListener('click', () => {
+        const key = emoji + "_" + [...captchaGrid.children].indexOf(btn);
+
+        // Toggle selection
+        if (btn.dataset.sel === "1") {
+          btn.dataset.sel = "0";
+          btn.classList.remove('border-green-500','bg-green-50');
+          selected.delete(emoji);
+        } else {
+          btn.dataset.sel = "1";
+          btn.classList.add('border-green-500','bg-green-50');
+          selected.add(emoji);
+        }
+
+        // enable verify only after at least 3 selections
+        if (selected.size >= 3) {
+          captchaVerify.disabled = false;
+          captchaVerify.classList.remove('opacity-40','cursor-not-allowed');
+        } else {
+          captchaVerify.disabled = true;
+          captchaVerify.classList.add('opacity-40','cursor-not-allowed');
+        }
+      });
+
+      captchaGrid.appendChild(btn);
+    });
+  }
+
+  captchaVerify.addEventListener('click', () => {
+    // must be EXACT: only the correct three
+    const ok = (selected.size === 3) && [...selected].every(e => correct.has(e));
+
+    if (!ok) {
+      captchaMsg.classList.remove('hidden');
+      setStatus("CAPTCHA failed. Try being more festive.", true);
+
+      // extra annoyance: reshuffle + clear
+      setupCaptcha();
+      return;
+    }
+
+    steps.captchaDone = true;
+    hide('captcha');
+    show('success');
+    setStatus("Somehow… you won.", false);
+  });
+
+  // Keep the lie bar moving
+  setInterval(lieProgress, 1500);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Final Challenge — Device Dance</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+      20%, 40%, 60%, 80% { transform: translateX(4px); }
+    }
+    .shake { animation: shake .35s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes pop { from { transform: scale(.96); opacity: .2; } to { transform: scale(1); opacity: 1; } }
+    .pop { animation: pop .18s ease-out; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace; }
+    .tiny { font-size: 11px; line-height: 1; padding: 4px 6px; }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-red-100 to-green-100 flex items-center justify-center p-4 font-sans">
+  <div class="absolute z-10 top-2 left-2">
+    <a href="index.html" class="text-sm p-2 text-red-400 hover:text-red-600">Go Back</a>
+  </div>
+
+  <!-- DESKTOP VIEW (lg+) -->
+  <div class="hidden lg:block w-full max-w-3xl">
+    <div class="text-center mb-6 pt-6">
+      <h1 class="text-4xl font-extrabold text-red-700 drop-shadow-sm mb-2">🖥️ Final Boss: The Device Dance 🖥️</h1>
+      <p class="text-red-900 opacity-80 font-medium">
+        Use technology to its fullest. The future is inconvenient.
+      </p>
+    </div>
+
+    <div class="bg-white shadow-2xl rounded-2xl overflow-hidden border-4 border-red-100">
+      <div class="p-6 bg-white shadow-sm">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <div class="text-sm font-bold text-gray-700 uppercase tracking-wide">Desktop Terminal</div>
+            <div class="text-gray-500 text-sm">You are now doing cross-device paperwork. Congrats.</div>
+          </div>
+          <button id="resetDesktop" class="tiny border rounded text-gray-400 hover:text-gray-700 hover:border-gray-300">
+            reset (regret)
+          </button>
+        </div>
+
+        <div class="mt-4 bg-gray-50 border rounded-xl p-4">
+          <div class="text-xs text-gray-500 mb-2">
+            System status: <span id="deskStatus" class="font-bold text-gray-700">Awaiting user confusion…</span>
+          </div>
+          <div class="w-full bg-gray-100 border rounded-full overflow-hidden">
+            <div id="deskProgress" class="h-3 bg-green-500" style="width: 7%"></div>
+          </div>
+          <div class="mt-2 text-[11px] text-gray-400">Progress is estimated and legally binding.</div>
+        </div>
+      </div>
+
+      <div class="p-6 bg-gray-50 border-t">
+        <div class="space-y-4">
+
+          <!-- STEP 1 -->
+          <div id="deskStep1" class="bg-white border rounded-2xl p-5 shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-sm font-bold text-gray-700">Step 1</div>
+                <div class="text-gray-600">
+                  Enter Code #1.
+                  <span class="font-semibold text-red-700">Hint:</span>
+                  Maybe a <span class="font-bold">smaller screen</span> reveals… more.
+                </div>
+              </div>
+              <span class="text-2xl">📱</span>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <input id="deskInput1" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all mono"
+                     placeholder="Enter Code #1..." autocomplete="off">
+              <button id="deskBtn1" class="px-5 py-3 bg-red-600 text-white font-extrabold rounded-xl hover:bg-red-700 transition shadow">
+                Submit
+              </button>
+            </div>
+            <div id="deskMsg1" class="mt-3 text-sm hidden"></div>
+          </div>
+
+          <!-- STEP 2 -->
+          <div id="deskStep2" class="hidden bg-white border rounded-2xl p-5 shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-sm font-bold text-gray-700">Step 2</div>
+                <div class="text-gray-600">
+                  Enter Code #2.
+                  <span class="font-semibold text-red-700">Hint:</span>
+                  On mobile, try… <span class="font-bold">scrolling</span>. A lot.
+                </div>
+              </div>
+              <span class="text-2xl">🧻</span>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <input id="deskInput2" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all mono"
+                     placeholder="Enter Code #2..." autocomplete="off">
+              <button id="deskBtn2" class="px-5 py-3 bg-red-600 text-white font-extrabold rounded-xl hover:bg-red-700 transition shadow">
+                Submit
+              </button>
+            </div>
+            <div id="deskMsg2" class="mt-3 text-sm hidden"></div>
+          </div>
+
+          <!-- STEP 3 -->
+          <div id="deskStep3" class="hidden bg-white border rounded-2xl p-5 shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-sm font-bold text-gray-700">Step 3</div>
+                <div class="text-gray-600">
+                  Enter Code #3.
+                  <span class="font-semibold text-red-700">Hint:</span>
+                  On mobile, can you find a 📱?
+                </div>
+              </div>
+              <span class="text-2xl">🙃</span>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <input id="deskInput3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all mono"
+                     placeholder="Enter Code #3..." autocomplete="off">
+              <button id="deskBtn3" class="px-5 py-3 bg-red-600 text-white font-extrabold rounded-xl hover:bg-red-700 transition shadow">
+                Submit
+              </button>
+            </div>
+            <div id="deskMsg3" class="mt-3 text-sm hidden"></div>
+          </div>
+
+          <!-- Final success -->
+          <button id="deskSuccess" class="hidden w-full cursor-pointer mt-2 p-8 bg-green-100 rounded-xl border-2 border-green-200 text-center animate-bounce shadow-lg">
+            <div class="text-5xl mb-4">🎄🏆✅</div>
+            <h2 class="text-3xl font-bold text-green-800 mb-2">Final Access Granted!</h2>
+            <p class="text-green-700 font-semibold text-lg">You defeated responsive design. Everyone is upset.</p>
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE VIEW (under lg) -->
+  <div class="block lg:hidden w-full max-w-md">
+    <div class="text-center mb-6 pt-6 relative">
+      <!-- secret-ish phone button -->
+      <button id="secretPhoneBtn"
+      class="absolute right-0 top-0 -translate-y-2 text-2xl opacity-70 hover:opacity-100 active:scale-95 transition"
+      title="totally normal phone button">
+      📱
+    </button>
+    <p id="code3TopHint" class="hidden bg-white p-4 rounded-xl my-4">You found the button, well done. Back down you go ⬇️</p>
+
+      <h1 class="text-4xl font-extrabold text-red-700 drop-shadow-sm mb-2">📱 Mobile Intel 📱</h1>
+      <p class="text-red-900 opacity-80 font-medium">
+        Welcome to the “secret” device. Please don’t get comfortable.
+      </p>
+    </div>
+
+
+    <div class="bg-white shadow-2xl rounded-2xl overflow-hidden border-4 border-red-100">
+      <div class="p-6 bg-white shadow-sm">
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-bold text-gray-700 uppercase tracking-wide">Leak Console</div>
+          <button id="resetMobile" class="tiny border rounded text-gray-400 hover:text-gray-700 hover:border-gray-300">
+            reset
+          </button>
+        </div>
+        <div class="mt-2 text-gray-500 text-sm">
+          Find codes here. Type them on desktop. Prepare to be whelmed.
+        </div>
+      </div>
+
+      <div class="p-6 bg-gray-50 border-t">
+
+
+        <!-- CODE #1 (only visible content at first) -->
+        <div class="bg-white border rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-sm font-bold text-gray-700">Code #1</div>
+              <div class="text-gray-600 text-sm">Enter this on desktop to unlock the next insult.</div>
+            </div>
+            <span class="text-2xl">🕵️</span>
+          </div>
+
+          <div class="mt-3 p-4 bg-red-100 border-4 border-red-500 rounded-lg text-2xl mono font-bold text-red-800 tracking-wider text-center">
+            <span id="code1"></span>
+          </div>
+
+          <div class="mt-2 text-[11px] text-gray-400">
+            That’s all. For now.
+          </div>
+        </div>
+
+
+        </div></div>
+
+
+
+        <!-- runway -->
+        <div class="h-[8000vh]"></div>
+
+        <!-- Fun scroll coach -->
+        <div id="scrollCoach" class="hidden fixed left-4 right-4 bottom-4 z-40 bg-white border shadow-xl rounded-xl p-4 pop">
+          <div class="text-sm font-extrabold text-gray-800">Scrolling Progress</div>
+          <div id="coachText" class="text-sm text-gray-600 mt-1">
+            You have begun the journey. Regrettable.
+          </div>
+          <div class="mt-2 text-[11px] text-gray-400">This banner exists to waste screen space.</div>
+        </div>
+
+        <!-- CODE #2 (HIDDEN by default) -->
+        <div id="code2Section" class="hidden mt-10 bg-white border rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-sm font-bold text-gray-700">Code #2</div>
+              <div class="text-gray-600 text-sm">You scrolled. The system is fed.</div>
+            </div>
+            <span class="text-2xl">🧻</span>
+          </div>
+
+          <div class="mt-3 p-4 bg-green-100 border-2 border-green-300 rounded-xl text-center">
+            <div class="text-sm font-bold text-green-800">✅ You made it.</div>
+            <div class="mt-2 p-3 bg-white border-2 border-green-200 rounded-lg text-xl mono font-extrabold text-green-800">
+              <span id="code2"></span>
+            </div>
+          </div>
+
+          <div class="mt-2 text-[11px] text-gray-400">
+            That’s it. No more help.
+          </div>
+        </div>
+
+        <!-- more runway -->
+        <div class="h-[70vh]"></div>
+
+        <!-- Orientation panel: hidden until phone emoji is clicked -->
+        <div id="orientationPanel" class="hidden bg-white border rounded-2xl p-5 shadow-sm pop">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-sm font-bold text-gray-700">📱 Orientation Console</div>
+              <div class="text-gray-600 text-sm">
+                Congratulations. You found the secret emoji button.
+                Now rotate/tilt your phone so it’s <span class="font-bold">not upright portrait</span>.
+              </div>
+            </div>
+            <span class="text-2xl">🧭</span>
+          </div>
+
+          <div class="mt-3 p-3 bg-gray-50 border rounded-xl text-xs text-gray-600 mono" id="tiltDebug">
+            Orientation data: (locked until you start being weird)
+          </div>
+
+          <button id="enableMotion" class="mt-3 w-full px-4 py-3 bg-gray-900 text-white font-extrabold rounded-xl hover:bg-black transition shadow">
+            Enable Motion Access (ask politely)
+          </button>
+
+          <div class="mt-2 text-[11px] text-gray-400">
+            If permission fails: rotate fully to landscape or flip upside down. Computers love drama.
+          </div>
+        </div>
+
+        <!-- CODE #3: hidden until orientationPanel has been opened -->
+        <div id="code3Locked" class="mb-24 hidden bg-white border rounded-2xl p-5 shadow-sm mt-4">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-sm font-bold text-gray-700">Code #3</div>
+              <div class="text-gray-600 text-sm">
+                This unlocks when the phone is <span class="font-bold">not upright.</span>.
+              </div>
+            </div>
+            <span class="text-2xl">🔒</span>
+          </div>
+          <div class="mt-3 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800">
+            Status: upright portrait detected.
+          </div>
+        </div>
+
+        <div id="code3Section" class="hidden bg-white border-2 border-green-300 rounded-2xl p-5 shadow-sm mt-4">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-sm font-bold text-gray-700">Code #3</div>
+              <div class="text-gray-600 text-sm">✅ Not-upright portrait detected. Well done. You can turn a phone.</div>
+            </div>
+            <span class="text-2xl">🙃</span>
+          </div>
+
+          <div class="mt-3 p-4 bg-green-100 border-2 border-green-300 rounded-xl text-center">
+            <div class="text-sm font-bold text-green-800">Here you go:</div>
+            <div class="mt-2 p-3 bg-white border-2 border-green-200 rounded-lg text-xl mono font-extrabold text-green-800">
+              <span id="code3"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="h-10"></div>
+  </div>
+
+  <!-- Final clue modal (desktop) -->
+  <div id="clueModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-60">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 text-center pop">
+      <div class="text-6xl mb-6">🎅🔓</div>
+      <h2 class="text-3xl font-extrabold text-red-700 mb-3">Final Clue Unlocked</h2>
+      <p class="text-gray-700 mb-6 text-lg font-semibold">
+        You operated multiple devices. This is basically an I.T. apprenticeship.
+      </p>
+
+      <div class="p-4 bg-red-100 border-4 border-red-500 rounded-lg text-2xl mono font-bold text-red-800 tracking-wider mb-8">
+        REPLACE WITH YOUR FINAL CLUE
+      </div>
+
+      <a href="index.html" class="inline-block px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors">
+        Go Back to the Main Page
+      </a>
+    </div>
+  </div>
+
+<script>
+  // ===============================================================
+  // CONFIG: set your 3 codes here
+  // ===============================================================
+  const CODES = {
+    code1: "SNOWGLOBE",
+    code2: "CANDYCANE",
+    code3: "TILT-TO-REVEAL"
+  };
+
+  // ===============================================================
+  // Helpers
+  // ===============================================================
+  const $ = (id) => document.getElementById(id);
+  const norm = (s) => String(s || "").trim().toLowerCase();
+
+  function setBar(pct) {
+    const el = $("deskProgress");
+    if (!el) return;
+    el.style.width = `${pct}%`;
+  }
+  function setDeskStatus(text) {
+    const el = $("deskStatus");
+    if (!el) return;
+    el.textContent = text;
+  }
+  function showMsg(id, ok, msg) {
+    const el = $(id);
+    if (!el) return;
+    el.classList.remove("hidden");
+    el.className = `mt-3 text-sm ${ok ? "text-green-700 font-semibold" : "text-red-700 font-semibold"}`;
+    el.textContent = msg;
+  }
+
+  // ===============================================================
+  // Desktop state
+  // ===============================================================
+  const LS = "np_final_device_dance_v3";
+  const deskState = { step: 1 };
+
+  function loadDesk() {
+    try {
+      const raw = localStorage.getItem(LS);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      if (typeof d?.step === "number") deskState.step = Math.min(4, Math.max(1, d.step));
+    } catch {}
+  }
+  function saveDesk() {
+    localStorage.setItem(LS, JSON.stringify({ step: deskState.step }));
+  }
+  function resetAll() {
+    localStorage.removeItem(LS);
+    deskState.step = 1;
+    location.reload();
+  }
+
+  function renderDesktop() {
+    if (!$("deskStep1")) return;
+
+    $("deskStep1").classList.toggle("hidden", deskState.step > 1);
+    $("deskStep2").classList.toggle("hidden", deskState.step !== 2);
+    $("deskStep3").classList.toggle("hidden", deskState.step !== 3);
+    $("deskSuccess").classList.toggle("hidden", deskState.step < 4);
+
+    const map = { 1: 10, 2: 45, 3: 80, 4: 100 };
+    setBar(map[deskState.step] || 7);
+
+    const statusMap = {
+      1: "Step 1 armed. Locate a smaller screen…",
+      2: "Step 2 armed. Scroll-based suffering required.",
+      3: "Step 3 armed. Secret emoji + orientation nonsense required.",
+      4: "All steps complete. The elves are filing paperwork."
+    };
+    setDeskStatus(statusMap[deskState.step] || "Glitch detected. Probably fine.");
+  }
+
+  function bindDesktop() {
+    if (!$("deskBtn1")) return;
+    $("resetDesktop").addEventListener("click", resetAll);
+
+    $("deskBtn1").addEventListener("click", () => {
+      const v = norm($("deskInput1").value);
+      if (v === norm(CODES.code1)) {
+        deskState.step = 2; saveDesk();
+        showMsg("deskMsg1", true, "Correct. Mobile secrets have been extracted.");
+        renderDesktop();
+      } else {
+        $("deskBtn1").classList.add("shake");
+        setTimeout(() => $("deskBtn1").classList.remove("shake"), 380);
+        showMsg("deskMsg1", false, "Incorrect. Have you tried… smaller pixels?");
+      }
+    });
+
+    $("deskBtn2").addEventListener("click", () => {
+      const v = norm($("deskInput2").value);
+      if (v === norm(CODES.code2)) {
+        deskState.step = 3; saveDesk();
+        showMsg("deskMsg2", true, "Correct. Scrolling has been spiritually acknowledged.");
+        renderDesktop();
+      } else {
+        $("deskBtn2").classList.add("shake");
+        setTimeout(() => $("deskBtn2").classList.remove("shake"), 380);
+        showMsg("deskMsg2", false, "Incorrect. Scroll deeper. Deeper. No, deeper.");
+      }
+    });
+
+    $("deskBtn3").addEventListener("click", () => {
+      const v = norm($("deskInput3").value);
+      if (v === norm(CODES.code3)) {
+        deskState.step = 4; saveDesk();
+        showMsg("deskMsg3", true, "Correct. The device is sufficiently non-upright.");
+        renderDesktop();
+      } else {
+        $("deskBtn3").classList.add("shake");
+        setTimeout(() => $("deskBtn3").classList.remove("shake"), 380);
+        showMsg("deskMsg3", false, "Incorrect. Tap the tiny 📱 on mobile and embrace crooked physics.");
+      }
+    });
+
+    $("deskSuccess").addEventListener("click", () => {
+      $("clueModal").classList.remove("hidden");
+    });
+  }
+
+  // ===============================================================
+  // Mobile logic
+  // ===============================================================
+  function bindMobile() {
+    if (!$("code1")) return;
+
+    $("resetMobile").addEventListener("click", () => {
+      localStorage.removeItem(LS);
+      location.reload();
+    });
+
+    $("code1").textContent = CODES.code1;
+    $("code2").textContent = CODES.code2;
+    $("code3").textContent = CODES.code3;
+
+    // scroll coach + reveal code2
+    const coach = $("scrollCoach");
+    const coachText = $("coachText");
+    const code2Section = $("code2Section");
+    let coachShown = false;
+    let code2Shown = false;
+
+    const messages = [
+      "You have begun the journey. Regrettable.",
+      "Still nothing. The void is normal.",
+      "This is what UX designers mean by “engagement”.",
+      "If you stop scrolling, the elves win.",
+      "You're so close. (This is also a lie.)",
+      "Congratulations. You’re doing paperwork with your thumb."
+    ];
+
+    function updateCoachAndReveal() {
+      const y = window.scrollY || 0;
+
+      if (y > 1000 && !coachShown) {
+        coach.classList.remove("hidden");
+        coachShown = true;
+      }
+
+      if (coachShown) {
+        const docH = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const pct = Math.max(0, Math.min(1, y / docH));
+        const idx = Math.min(messages.length - 1, Math.floor(pct * messages.length));
+        coachText.textContent = messages[idx];
+      }
+
+      // Reveal Code #2 after enough scrolling (tweak this number)
+      if (!code2Shown && y > 1200) {
+        code2Section.classList.remove("hidden");
+        code2Shown = true;
+        coachText.textContent = "Oh look. Content. Finally. 🙄";
+      }
+    }
+
+    window.addEventListener("scroll", updateCoachAndReveal, { passive: true });
+    updateCoachAndReveal();
+
+    // Orientation unlock flow (via secret emoji)
+    const secretBtn = $("secretPhoneBtn");
+    const panel = $("orientationPanel");
+    const code3Locked = $("code3Locked");
+    const code3TopHint = $("code3TopHint");
+    const code3Section = $("code3Section");
+    const tiltDebug = $("tiltDebug");
+    const enableMotionBtn = $("enableMotion");
+
+    let lastOrientation = { beta: null, gamma: null };
+
+    function screenAngle() {
+      if (screen.orientation && typeof screen.orientation.angle === "number") return screen.orientation.angle;
+      if (typeof window.orientation === "number") return window.orientation;
+      return null;
+    }
+
+    function isNotUprightPortrait() {
+      const ang = screenAngle();
+      if (ang !== null) return ang !== 0;
+
+      if (window.matchMedia && window.matchMedia("(orientation: landscape)").matches) return true;
+
+      const { beta, gamma } = lastOrientation;
+      if (typeof gamma === "number" && Math.abs(gamma) > 30) return true; // sideways tilt
+      if (typeof beta === "number" && Math.abs(beta) > 30 && Math.abs(beta) < 150) return true; // forward/back tilt
+      return false;
+    }
+
+    function updateTiltUI() {
+      const ang = screenAngle();
+      const { beta, gamma } = lastOrientation;
+
+      tiltDebug.textContent =
+        `angle=${ang ?? "?"}°, beta=${(typeof beta==="number") ? beta.toFixed(1) : "?"}, gamma=${(typeof gamma==="number") ? gamma.toFixed(1) : "?"}`;
+
+      const ok = isNotUprightPortrait();
+      code3Locked.classList.toggle("hidden", ok);
+      code3Section.classList.toggle("hidden", !ok);
+    }
+
+    function onDeviceOrientation(e) {
+      lastOrientation.beta = (typeof e.beta === "number") ? e.beta : lastOrientation.beta;
+      lastOrientation.gamma = (typeof e.gamma === "number") ? e.gamma : lastOrientation.gamma;
+      updateTiltUI();
+    }
+
+    async function enableMotion() {
+      try {
+        if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+          const res = await DeviceOrientationEvent.requestPermission();
+          if (res !== "granted") throw new Error("permission not granted");
+        }
+        window.addEventListener("deviceorientation", onDeviceOrientation);
+        enableMotionBtn.textContent = "Motion Access Enabled (suspicious)";
+      } catch (err) {
+        enableMotionBtn.textContent = "Motion Access Failed (classic)";
+      } finally {
+        updateTiltUI();
+      }
+    }
+
+    enableMotionBtn.addEventListener("click", enableMotion);
+
+    secretBtn.addEventListener("click", async () => {
+      panel.classList.remove("hidden");
+      code3Locked.classList.remove("hidden");
+      code3TopHint.classList.remove("hidden");
+      await enableMotion();
+      updateTiltUI();
+      secretBtn.classList.add("shake");
+      setTimeout(() => secretBtn.classList.remove("shake"), 380);
+    });
+
+    window.addEventListener("orientationchange", updateTiltUI);
+    window.addEventListener("resize", updateTiltUI);
+    setInterval(() => {
+      if (!panel.classList.contains("hidden")) updateTiltUI();
+    }, 500);
+  }
+
+  // ===============================================================
+  // Init
+  // ===============================================================
+  loadDesk();
+  renderDesktop();
+  bindDesktop();
+  bindMobile();
+</script>
+</body>
+</html>

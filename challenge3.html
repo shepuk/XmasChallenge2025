@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Challenge 3 — Critical Christmas Failure</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner{
+      width:34px;height:34px;border-radius:999px;
+      border:4px solid rgba(255,255,255,.35);
+      border-top-color:rgba(255,255,255,1);
+      animation:spin 1s linear infinite;
+    }
+
+    .bsod{ background:#0078d7; color:#fff; }
+    .winupdate{ background:#0067b8; color:#fff; }
+    .winscreen{ background:radial-gradient(circle at 30% 20%, #0ea5e9, #1e3a8a 60%, #0b1220); color:#fff; }
+
+    .monospace-ish{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace; }
+    .tiny-btn{ font-size:11px; padding:4px 8px; line-height:1; }
+
+    .hold-bar{
+      height:10px; background:rgba(255,255,255,.18);
+      border-radius:999px; overflow:hidden;
+    }
+    .hold-fill{
+      height:100%; width:0%;
+      background:rgba(255,255,255,.85);
+      transition:width 0.06s linear;
+    }
+
+    @keyframes pop { from { transform: scale(.96); opacity:.2; } to { transform: scale(1); opacity:1; } }
+    .pop{ animation: pop .18s ease-out; }
+  </style>
+</head>
+
+<body class="min-h-screen">
+  <div class="absolute z-10 top-2 left-2">
+    <a href="index.html" class="text-sm p-2 text-white/70 hover:text-white">Go Back</a>
+  </div>
+
+  <div id="app" class="min-h-screen"></div>
+
+  <div id="clueModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 text-center pop">
+      <div class="text-6xl mb-5">🏁</div>
+      <h2 class="text-3xl font-extrabold text-blue-700 mb-3">System Restored</h2>
+      <p class="text-gray-700 mb-6 text-lg font-semibold">
+        Congratulations. You survived the reboot cycle.
+      </p>
+
+      <div class="p-4 bg-blue-100 border-4 border-blue-500 rounded-lg text-2xl monospace-ish font-bold text-blue-800 tracking-wider mb-8">
+        REPLACE WITH YOUR CLUE
+      </div>
+
+      <a href="index.html" class="inline-block px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors">
+        Go Back to the Main Page
+      </a>
+
+      <button id="resetBtn" class="block mx-auto mt-4 tiny-btn text-gray-400 underline">
+        (reset this challenge)
+      </button>
+    </div>
+  </div>
+
+<script>
+  // ────────────────────────────────────────────────────────────────
+  // localStorage state
+  // ────────────────────────────────────────────────────────────────
+  const KEY_STAGE = "np_ch3_stage";
+  const KEY_UPDATE_START = "np_ch3_update_start";
+  const KEY_RESTART_ARMED = "np_ch3_restart_armed"; // BSOD -> update gate
+
+  // Stage meanings:
+  // 0 or null: BSOD
+  // 1: Update screen
+  // 2: Win screen
+  function setStage(n) { localStorage.setItem(KEY_STAGE, String(n)); }
+  function getStage() {
+    const raw = localStorage.getItem(KEY_STAGE);
+    const n = raw === null ? 0 : parseInt(raw, 10);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function setUpdateStart(ms) { localStorage.setItem(KEY_UPDATE_START, String(ms)); }
+  function getUpdateStart() {
+    const raw = localStorage.getItem(KEY_UPDATE_START);
+    const n = raw ? parseInt(raw, 10) : Date.now();
+    return Number.isFinite(n) ? n : Date.now();
+  }
+
+  function resetChallenge() {
+    localStorage.removeItem(KEY_STAGE);
+    localStorage.removeItem(KEY_UPDATE_START);
+    localStorage.removeItem(KEY_RESTART_ARMED);
+    location.reload();
+  }
+
+  function navIsReload() {
+    // Modern browsers
+    const nav = performance.getEntriesByType?.("navigation")?.[0];
+    if (nav && nav.type) return nav.type === "reload";
+
+    // Older fallback
+    if (performance && performance.navigation) return performance.navigation.type === 1;
+
+    return false;
+  }
+
+  // If we are on BSOD stage, and the restart has been "armed",
+  // only advance to update when the user actually reloads the page.
+  function maybeAdvanceFromBsodOnReload() {
+    if (getStage() !== 0) return;
+    if (localStorage.getItem(KEY_RESTART_ARMED) !== "1") return;
+    if (!navIsReload()) return;
+
+    setStage(1);
+    setUpdateStart(Date.now());
+    localStorage.removeItem(KEY_RESTART_ARMED);
+  }
+
+  // ────────────────────────────────────────────────────────────────
+  // Render screens
+  // ────────────────────────────────────────────────────────────────
+  const app = document.getElementById("app");
+  const clueModal = document.getElementById("clueModal");
+
+  function render() {
+    const stage = getStage();
+    if (stage === 0) return renderBSOD();
+    if (stage === 1) return renderUpdate();
+    return renderWin();
+  }
+
+  function renderBSOD() {
+    app.className = "min-h-screen bsod flex items-center justify-center p-8";
+    app.innerHTML = `
+      <div class="w-full max-w-3xl">
+        <div class="text-8xl font-light mb-6">:(</div>
+        <div class="text-2xl mb-4 font-semibold">
+          Your PC ran into a problem and needs to restart.
+        </div>
+        <div class="text-lg opacity-90 mb-8">
+          We're just collecting some error info, and then we'll restart for you.
+        </div>
+
+        <div class="flex items-center gap-4 mb-8">
+          <div class="spinner"></div>
+          <div class="text-lg">
+            <span id="bsodPct">0%</span> complete
+          </div>
+        </div>
+
+        <div class="opacity-85 text-sm leading-relaxed mb-6">
+          For more information about this issue and possible fixes, visit:
+          <span class="underline">northpole.support/why</span><br/>
+          If you call a support person, give them this info:<br/>
+          Stop code: <span class="monospace-ish">CHRISTMAS_EXCEPTION_NOT_HANDLED</span><br/>
+          What failed: <span class="monospace-ish">wife_happiness.sys</span>
+        </div>
+
+        <div id="reloadHint" class="hidden mt-6 p-4 bg-white/10 border border-white/20 rounded-xl">
+          <div class="font-bold">Restart required.</div>
+          <div class="text-white/80 text-sm mt-1">
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 items-center mt-6">
+          <button id="fakeBtn" class="tiny-btn border border-white/50 rounded text-white/70 hover:text-white">
+            Try Again
+          </button>
+          <span class="text-white/70 text-sm ml-auto">
+            Tip: the browser restart is “mandatory”.
+          </span>
+        </div>
+      </div>
+    `;
+
+    let pct = 0;
+    const pctEl = document.getElementById("bsodPct");
+    const reloadHint = document.getElementById("reloadHint");
+
+    const tick = setInterval(() => {
+      pct += Math.random() < 0.7 ? 1 : 0;
+      if (pct > 13) pct = 13;
+      pctEl.textContent = pct + "%";
+
+      // Once we’re “stuck”, arm the restart requirement
+      if (pct >= 13 && localStorage.getItem(KEY_RESTART_ARMED) !== "1") {
+        localStorage.setItem(KEY_RESTART_ARMED, "1");
+        reloadHint.classList.remove("hidden");
+      }
+    }, 350);
+
+    document.getElementById("fakeBtn").addEventListener("click", () => {
+      pctEl.textContent = "13%";
+      // Ensure the gate is armed even if she clicks Try Again
+      if (localStorage.getItem(KEY_RESTART_ARMED) !== "1") {
+        localStorage.setItem(KEY_RESTART_ARMED, "1");
+        reloadHint.classList.remove("hidden");
+      }
+    });
+
+    // IMPORTANT: no restart button handler anymore.
+    // Also: we don’t auto-advance here — only on a real browser reload.
+  }
+
+  function renderUpdate() {
+    app.className = "min-h-screen winupdate flex items-center justify-center p-8";
+    app.innerHTML = `
+      <div class="w-full max-w-2xl text-center">
+        <div class="spinner mx-auto mb-6"></div>
+
+        <div class="text-3xl font-semibold mb-2">Working on updates</div>
+        <div class="text-xl opacity-90 mb-6">
+          <span id="updPct">0%</span> complete.
+          <span class="block mt-2 text-white/80 text-base">
+            Approximately <span id="etaHrs">12</span> hours remaining
+          </span>
+        </div>
+
+        <div class="text-white/80 mb-10">
+          Don't turn off your computer.
+          <span class="block text-white/60 text-sm mt-1">(You absolutely will.)</span>
+        </div>
+
+        <div class="bg-white/10 border border-white/20 rounded-xl p-5 text-left">
+          <div class="text-sm font-semibold mb-2">Advanced options</div>
+          <div class="text-xs text-white/70 mb-4">
+            If the update seems stuck, you may perform a “force restart”.
+            (This will not damage anything, except your patience.)
+          </div>
+
+          <button id="holdBtn" class="w-full px-4 py-4 bg-white/15 hover:bg-white/20 rounded-xl font-bold">
+            Press and hold to Force Restart
+          </button>
+
+          <div class="hold-bar mt-3">
+            <div id="holdFill" class="hold-fill"></div>
+          </div>
+
+          <div class="mt-3 flex items-center justify-between text-[11px] text-white/60">
+            <span>Requirement: hold for <span class="font-bold text-white/80">2.2 seconds</span></span>
+            <button id="helpLink" class="underline">why is this necessary?</button>
+          </div>
+
+          <div id="helpText" class="hidden mt-3 text-xs text-white/70">
+            Because the North Pole I.T. department believes “resilience” builds character.
+          </div>
+        </div>
+      </div>
+    `;
+
+    const pctEl = document.getElementById("updPct");
+    const etaEl = document.getElementById("etaHrs");
+    const helpLink = document.getElementById("helpLink");
+    const helpText = document.getElementById("helpText");
+
+    helpLink.addEventListener("click", () => helpText.classList.toggle("hidden"));
+
+    const start = getUpdateStart();
+    let pct = 0;
+
+    const timer = setInterval(() => {
+      const elapsed = Math.max(0, Date.now() - start);
+
+      if (pct < 7) pct += Math.random() < 0.65 ? 1 : 0;
+      else if (Math.random() < 0.12) pct = Math.max(5, pct - 1);
+
+      pctEl.textContent = pct + "%";
+
+      const wobble = (Math.sin(elapsed / 5000) + 1) * 0.6;
+      const eta = 12 - Math.min(1.2, wobble);
+      etaEl.textContent = eta.toFixed(1);
+    }, 600);
+
+    const holdBtn = document.getElementById("holdBtn");
+    const holdFill = document.getElementById("holdFill");
+    let holding = false;
+    let holdStart = 0;
+    const requiredMs = 2200;
+
+    function stopHold() {
+      holding = false;
+      holdStart = 0;
+      holdFill.style.width = "0%";
+      holdBtn.classList.remove("ring-4","ring-white/40");
+    }
+
+    function startHold() {
+      holding = true;
+      holdStart = Date.now();
+      holdBtn.classList.add("ring-4","ring-white/40");
+
+      const loop = () => {
+        if (!holding) return;
+        const t = Date.now() - holdStart;
+        const p = Math.min(100, Math.floor((t / requiredMs) * 100));
+        holdFill.style.width = p + "%";
+
+        if (t >= requiredMs) {
+          clearInterval(timer);
+          setStage(2);
+          location.reload();
+          return;
+        }
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    }
+
+    holdBtn.addEventListener("mousedown", startHold);
+    holdBtn.addEventListener("touchstart", (e) => { e.preventDefault(); startHold(); }, { passive: false });
+    window.addEventListener("mouseup", stopHold);
+    window.addEventListener("touchend", stopHold);
+
+    app.addEventListener("click", (e) => {
+      if (e.target.id === "holdBtn") return;
+      if (Math.random() < 0.08) {
+        pct = Math.max(0, pct - 1);
+        pctEl.textContent = pct + "%";
+      }
+    });
+  }
+
+  function renderWin() {
+    app.className = "min-h-screen winscreen flex items-center justify-center p-8";
+    app.innerHTML = `
+      <div class="w-full max-w-md text-center">
+        <div class="mx-auto w-24 h-24 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-4xl mb-6">
+          👤
+        </div>
+
+        <div class="text-3xl font-extrabold mb-2">Welcome Back</div>
+        <div class="text-white/80 mb-8">System stability restored. Probably.</div>
+
+        <button id="unlockBtn" class="w-full px-6 py-4 bg-white text-blue-900 font-extrabold rounded-xl shadow hover:bg-white/90 transition">
+          Unlock
+        </button>
+
+        <div class="mt-4 text-xs text-white/60">
+          Pressing “Unlock” constitutes agreement to 14 new terms.
+        </div>
+      </div>
+    `;
+
+    document.getElementById("unlockBtn").addEventListener("click", () => {
+      clueModal.classList.remove("hidden");
+    });
+  }
+
+  document.getElementById("resetBtn").addEventListener("click", resetChallenge);
+
+  // IMPORTANT: advance only if page load is a real reload AND restart was armed
+  maybeAdvanceFromBsodOnReload();
+
+  render();
+</script>
