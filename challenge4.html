@@ -3,36 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Challenge 4 — Computers Are Technically Correct</title>
+  <title>Challenge 4 — North Pole Mini Bootcamp</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <style>
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-      20%, 40%, 60%, 80% { transform: translateX(4px); }
-    }
-    .shake { animation: shake .35s cubic-bezier(.36,.07,.19,.97) both; }
-
-    @keyframes pop { from { transform: scale(.96); opacity: .2; } to { transform: scale(1); opacity: 1; } }
-    .pop { animation: pop .18s ease-out; }
-
-    .tiny { font-size: 11px; line-height: 1; padding: 4px 6px; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace; }
-
-    /* bad UI: make code blocks feel “terminal-ish” */
     pre { white-space: pre-wrap; word-break: break-word; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace; }
   </style>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-red-100 to-green-100 flex items-center justify-center p-4 font-sans">
   <div class="absolute z-10 top-2 left-2">
-    <a href="index.html" class="text-sm p-2 text-red-400 hover:text-red-600">Go Back</a>
+    <a href="index.html" class="text-sm p-2 text-red-500 hover:text-red-700">← Go Back</a>
   </div>
 
   <div class="w-full max-w-3xl flex flex-col max-h-screen">
     <div class="text-center mb-6 pt-6 shrink-0">
-      <h1 class="text-4xl font-extrabold text-red-700 drop-shadow-sm mb-2">🧠 North Pole Data Bootcamp 🧠</h1>
-      <p class="text-red-900 opacity-80 font-medium">Learning Python + SQL… while computers behave like goblins.</p>
+      <h1 class="text-4xl font-extrabold text-red-700 drop-shadow-sm mb-2">🧠 North Pole Mini Bootcamp 🧠</h1>
+      <p class="text-red-900 opacity-80 font-medium">Tiny Python + SQL basics (with a Christmas vibe).</p>
     </div>
 
     <div class="bg-white shadow-2xl rounded-2xl overflow-hidden border-4 border-red-100 relative flex flex-col shrink min-h-0">
@@ -41,452 +28,238 @@
       <div class="p-6 bg-white z-20 shadow-sm shrink-0">
         <div class="flex items-center justify-between gap-4">
           <div class="text-sm font-bold text-gray-700 uppercase tracking-wide">
-            Challenge 4: Quirks & Queries
+            Challenge 4: Basics & Clues
             <span id="topicBadge" class="ml-2 inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-600 font-semibold normal-case">
-              loading…
+              —
             </span>
           </div>
 
-          <div class="flex items-center gap-2">
-            <button id="resetProgressBtn" class="tiny border rounded text-gray-400 hover:text-gray-700 hover:border-gray-300">
-              reset (dangerous)
-            </button>
-          </div>
+          <button id="resetBtn" class="text-xs px-3 py-2 border rounded-lg text-gray-500 hover:text-gray-800 hover:border-gray-300">
+            Reset
+          </button>
         </div>
 
         <div class="mt-4">
           <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
             <span id="progressLabel">Progress: 0/0</span>
-            <span id="progressSnark" class="text-gray-400">Confidence: low</span>
+            <span id="progressNote" class="text-gray-400">Keep going ✨</span>
           </div>
           <div class="w-full bg-gray-100 rounded-full overflow-hidden border">
-            <div id="progressBar" class="h-3 bg-green-500" style="width: 7%"></div>
+            <div id="progressBar" class="h-3 bg-green-500" style="width: 0%"></div>
           </div>
         </div>
       </div>
 
       <!-- Main content -->
       <div class="bg-gray-50 border-t border-gray-100 p-6 overflow-y-auto flex-1 scroll-smooth">
-        <!-- Question card -->
         <div id="card" class="bg-white border rounded-2xl shadow-sm p-6 relative">
-
-          <!-- Bad UI “settings” -->
-          <div class="absolute top-3 right-3 text-right">
-            <button id="settingsBtn" class="tiny text-gray-400 underline hover:text-gray-700">
-              settings
-            </button>
-            <div id="settingsPanel" class="hidden mt-2 bg-white border rounded-xl p-3 shadow-lg w-60 pop">
-              <div class="text-xs font-bold text-gray-700 mb-2">Advanced Settings (do not touch)</div>
-              <label class="flex items-center gap-2 text-xs text-gray-600">
-                <input id="enableMultiSelect" type="checkbox" class="w-3 h-3">
-                Enable multi-select (advanced users)
-              </label>
-              <div class="mt-2 text-[11px] text-gray-400">
-                Warning: enabling this may void your warranty.
-              </div>
-            </div>
-          </div>
 
           <div class="mb-4">
             <div class="text-sm text-gray-500 font-semibold">
-              Question <span id="qNumber">1</span> of <span id="qTotal">12</span>
+              Question <span id="qNumber">1</span> of <span id="qTotal">1</span>
             </div>
-            <h2 id="qTitle" class="text-2xl font-extrabold text-gray-800 mt-1">
-              loading…
-            </h2>
+            <h2 id="qTitle" class="text-2xl font-extrabold text-gray-800 mt-1">—</h2>
           </div>
 
-          <div id="qPrompt" class="mb-4">
-            <!-- injected -->
-          </div>
+          <div id="qPrompt" class="mb-4"></div>
 
-          <div id="options" class="space-y-2 mb-4">
-            <!-- injected -->
-          </div>
+          <div id="options" class="space-y-2 mb-4"></div>
 
-          <!-- hint + feedback -->
           <div class="flex flex-wrap gap-2 items-center">
             <button id="hintBtn" class="px-4 py-2 bg-gray-100 border rounded-lg font-bold text-gray-700 hover:bg-gray-200 transition">
-              Hint (probably useless)
+              Show Hint
             </button>
 
             <div class="flex-1 min-w-[220px] px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-900">
               <span class="font-bold">Hint:</span>
-              <span id="hintText" class="mono"></span>
-              <span id="hintCursor" class="mono opacity-40">▌</span>
+              <span id="hintText" class="ml-1"></span>
             </div>
 
             <button id="submitBtn" class="px-5 py-2 bg-red-600 text-white font-extrabold rounded-lg hover:bg-red-700 transition shadow">
-              Submit Answer
+              Check Answer
             </button>
           </div>
 
-          <div id="feedback" class="hidden mt-4 p-4 rounded-xl border text-sm">
-            <!-- injected -->
-          </div>
+          <div id="feedback" class="hidden mt-4 p-4 rounded-xl border text-sm"></div>
 
           <div class="mt-4 flex items-center justify-between">
-            <button id="prevBtn" class="tiny border rounded text-gray-400 hover:text-gray-700 hover:border-gray-300">
-              ← back
+            <button id="prevBtn" class="text-xs px-3 py-2 border rounded-lg text-gray-500 hover:text-gray-800 hover:border-gray-300">
+              ← Back
             </button>
 
             <button id="nextBtn" class="hidden px-5 py-2 bg-green-600 text-white font-extrabold rounded-lg hover:bg-green-700 transition shadow">
-              Continue (if you must)
+              Next →
             </button>
           </div>
         </div>
 
-        <!-- Success panel -->
-        <button id="success" class="hidden w-full cursor-pointer mt-6 p-8 bg-green-100 rounded-xl border-2 border-green-200 text-center animate-bounce shadow-lg">
-          <div class="text-5xl mb-4">🐍📊✅</div>
-          <h2 class="text-3xl font-bold text-green-800 mb-2">Competency Achieved!</h2>
-          <p class="text-green-700 font-semibold text-lg">
-            You learned something AND survived the UI. That’s basically a master’s degree.
+        <!-- Success -->
+        <div id="success" class="hidden mt-6 p-8 bg-green-100 rounded-xl border-2 border-green-200 text-center shadow-lg">
+          <div class="text-5xl mb-4">🎄✅</div>
+          <h2 class="text-3xl font-bold text-green-800 mb-2">Bootcamp Complete!</h2>
+          <p class="text-green-700 font-semibold text-lg mb-4">
+            You’ve earned the next clue location.
           </p>
-        </button>
+
+          <div class="p-4 bg-red-100 border-4 border-red-500 rounded-lg text-2xl mono font-bold text-red-800 tracking-wider mb-6 inline-block">
+            TOWER
+          </div>
+
+          <div>
+            <a href="index.html" class="inline-block px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors">
+              Back to Main Page
+            </a>
+          </div>
+        </div>
+
       </div>
-    </div>
-  </div>
-
-  <!-- Are you sure modal (button positions swap randomly) -->
-  <div id="confirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-60">
-    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 pop">
-      <div class="text-3xl mb-2">🧾</div>
-      <h3 class="text-xl font-extrabold text-gray-800 mb-2">Are you sure?</h3>
-      <p id="confirmText" class="text-gray-700 mb-4">
-        Submitting answers may cause happiness to increase unexpectedly.
-      </p>
-
-      <div id="confirmButtons" class="flex gap-2 justify-end">
-        <!-- injected order -->
-      </div>
-
-      <div class="mt-3 text-[11px] text-gray-400">
-        This dialog exists purely to slow you down. Thank you for your cooperation.
-      </div>
-    </div>
-  </div>
-
-  <!-- Clue modal -->
-  <div id="clueModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900 bg-opacity-60">
-    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 text-center pop">
-      <div class="text-6xl mb-6">🎁</div>
-      <h2 class="text-3xl font-extrabold text-red-700 mb-3">Your Clue</h2>
-      <p class="text-gray-700 mb-6 text-lg font-semibold">
-        Congratulations! You’ve earned an envelope location by understanding why computers are like this.
-      </p>
-
-      <div class="p-4 bg-red-100 border-4 border-red-500 rounded-lg text-2xl mono font-bold text-red-800 tracking-wider mb-8">
-        TOWER
-      </div>
-
-      <a href="index.html" class="inline-block px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors">
-        Go Back to the Main Page
-      </a>
     </div>
   </div>
 
 <script>
-  // ────────────────────────────────────────────────────────────────
-  // Question bank
-  // ────────────────────────────────────────────────────────────────
+  // ------------------------------------------------------------
+  // Simple question bank (easier + more educational)
+  // ------------------------------------------------------------
   const questions = [
-    {
-      id: "py_float",
-      topic: "Python",
-      title: "Float betrayal",
-      prompt: `
-        <div class="text-gray-700 mb-2 font-semibold">What does this print?</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-print(0.1 + 0.2 == 0.3)
-        </pre>
-      `,
-      type: "single",
-      hint: "Floating point math is approximate. The computer isn’t wrong—just... unhelpful.",
-      options: [
-        { k: "A", t: "True", ok: false },
-        { k: "B", t: "False", ok: true },
-        { k: "C", t: "Error", ok: false },
-        { k: "D", t: "Depends on Python version", ok: false },
-      ],
-      explain: "Binary floating-point can’t represent 0.1 and 0.2 exactly, so the result is slightly off."
-    },
-    {
-      id: "py_list_is",
-      topic: "Python",
-      title: "Identity crisis: is vs ==",
-      prompt: `
-        <div class="text-gray-700 mb-2 font-semibold">What does this print?</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-a = [1, 2]
-b = [1, 2]
-print(a is b, a == b)
-        </pre>
-      `,
-      type: "single",
-      hint: "`is` checks whether two variables are the same object. `==` checks whether values are equal.",
-      options: [
-        { k: "A", t: "True True", ok: false },
-        { k: "B", t: "False True", ok: true },
-        { k: "C", t: "True False", ok: false },
-        { k: "D", t: "False False", ok: false },
-      ],
-      explain: "`a` and `b` are different list objects (so `is` is False), but they contain the same values (so `==` is True)."
-    },
-    {
-      id: "py_defaults",
-      topic: "Python",
-      title: "Mutable default argument trap",
-      prompt: `
-        <div class="text-gray-700 mb-2 font-semibold">What gets printed?</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-def add(x, items=[]):
-    items.append(x)
-    return items
+  {
+  id: "py_variables_g",
+  topic: "Python",
+  title: "Updating a variable",
+  prompt: `
+    <div class="text-gray-700 mb-2 font-semibold">What is the final value of <span class="mono">g</span>?</div>
+    <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
+g = 2
+g = g + 3
+print(g)
+    </pre>
+  `,
+  hint: "Read it as: “new g equals old g plus 3.”",
+  options: [
+    { k: "A", t: "2", ok: false },
+    { k: "B", t: "3", ok: false },
+    { k: "C", t: "5", ok: true },
+  ],
+  explain: "<span class='mono'>g</span> starts at 2, then you add 3, so it becomes 5."
+},
 
-print(add(1))
-print(add(2))
-        </pre>
-      `,
-      type: "single",
-      hint: "Default arguments are evaluated once, when the function is defined. Yes, really.",
-      options: [
-        { k: "A", t: "[1] then [2]", ok: false },
-        { k: "B", t: "[1] then [1, 2]", ok: true },
-        { k: "C", t: "Error", ok: false },
-        { k: "D", t: "[1] then [1]", ok: false },
-      ],
-      explain: "The same list instance is reused across calls. Fix by using `items=None` then creating a list inside."
-    },
-    {
-      id: "py_truthy",
+  {
+      id: "py_upper",
       topic: "Python",
-      title: "Truthiness goblin",
+      title: "Uppercase a string",
       prompt: `
         <div class="text-gray-700 mb-2 font-semibold">What does this print?</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-print(bool("0"), bool(0), bool([]), bool(""), bool(None))
-        </pre>
+        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">print("hello".upper())</pre>
       `,
-      type: "single",
-      hint: "Empty things are usually False. Strings are True unless empty. `None` is False.",
+      hint: "The method <span class='mono'>upper()</span> makes letters uppercase.",
       options: [
-        { k: "A", t: "True True True True True", ok: false },
-        { k: "B", t: "True False False False False", ok: true },
-        { k: "C", t: "False False False False False", ok: false },
-        { k: "D", t: "Error", ok: false },
+        { k: "A", t: "hello", ok: false },
+        { k: "B", t: "HELLO", ok: true },
+        { k: "C", t: "Hello", ok: false },
       ],
-      explain: `"0" is a non-empty string (True), 0 is False, [] is False, "" is False, None is False.`
-    },
-    {
-      id: "py_div",
-      topic: "Python",
-      title: "Division: normal vs floor",
-      prompt: `
-        <div class="text-gray-700 mb-2 font-semibold">What does this print?</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-print(5 / 2, 5 // 2)
-        </pre>
-      `,
-      type: "single",
-      hint: "`/` produces a float. `//` floors (rounds down) to an integer for integers.",
-      options: [
-        { k: "A", t: "2.5 and 2", ok: true },
-        { k: "B", t: "2 and 2", ok: false },
-        { k: "C", t: "2.5 and 2.5", ok: false },
-        { k: "D", t: "3 and 2", ok: false },
-      ],
-      explain: "In Python 3, `/` is true division. `//` is floor division."
+      explain: "<span class='mono'>upper()</span> returns a new string with all letters capitalized."
     },
     {
       id: "py_range",
       topic: "Python",
-      title: "Range off-by-one (on purpose)",
+      title: "Ranges stop before the end",
       prompt: `
         <div class="text-gray-700 mb-2 font-semibold">What does this print?</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-print(list(range(3)))
-        </pre>
+        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">print(list(range(1, 4)))</pre>
       `,
-      type: "single",
-      hint: "range(n) starts at 0 and stops *before* n. Like a bouncer.",
+      hint: "<span class='mono'>range(1, 4)</span> starts at 1 and stops *before* 4.",
       options: [
-        { k: "A", t: "[1, 2, 3]", ok: false },
-        { k: "B", t: "[0, 1, 2]", ok: true },
+        { k: "A", t: "[1, 2, 3]", ok: true },
+        { k: "B", t: "[1, 2, 3, 4]", ok: false },
         { k: "C", t: "[0, 1, 2, 3]", ok: false },
-        { k: "D", t: "[]", ok: false },
       ],
-      explain: "Python ranges are half-open: include the start, exclude the end."
+      explain: "Python ranges are “end-exclusive,” so 4 is not included."
     },
-
-    // SQL section
     {
-      id: "sql_null_eq",
-      topic: "SQL",
-      title: "NULL is… not a value (it’s a vibe)",
+      id: "py_division",
+      topic: "Python",
+      title: "Division in Python",
       prompt: `
-        <div class="text-gray-700 mb-2 font-semibold">What does this return?</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-SELECT NULL = NULL;
-        </pre>
+        <div class="text-gray-700 mb-2 font-semibold">What does this print?</div>
+        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">print(5 / 2)</pre>
       `,
-      type: "single",
-      hint: "SQL has 3-valued logic: TRUE / FALSE / NULL (unknown).",
+      hint: "In Python, <span class='mono'>/</span> gives normal division (a decimal result).",
       options: [
-        { k: "A", t: "TRUE", ok: false },
-        { k: "B", t: "FALSE", ok: false },
-        { k: "C", t: "NULL", ok: true },
-        { k: "D", t: "Error", ok: false },
+        { k: "A", t: "2", ok: false },
+        { k: "B", t: "2.5", ok: true },
+        { k: "C", t: "3", ok: false },
       ],
-      explain: "Comparisons with NULL are UNKNOWN, so the result is NULL (not true or false)."
+      explain: "Use <span class='mono'>/</span> for a decimal result. (Floor division is <span class='mono'>//</span>.)"
     },
     {
-      id: "sql_count",
+      id: "sql_count_star",
       topic: "SQL",
-      title: "COUNT(*) vs COUNT(column)",
+      title: "COUNT rows",
       prompt: `
-        <div class="text-gray-700 mb-2 font-semibold">Table <span class="mono">people(name)</span> contains:</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-('Anna')
-(NULL)
-('Bob')
-        </pre>
-        <div class="text-gray-700 mb-2 font-semibold">What does this return?</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-SELECT COUNT(*), COUNT(name) FROM people;
-        </pre>
+        <div class="text-gray-700 mb-2 font-semibold">A table has 3 rows. What does this return?</div>
+        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">SELECT COUNT(*) FROM people;</pre>
       `,
-      type: "single",
-      hint: "COUNT(*) counts rows. COUNT(column) ignores NULLs in that column.",
+      hint: "<span class='mono'>COUNT(*)</span> counts how many rows are in the table.",
       options: [
-        { k: "A", t: "2, 2", ok: false },
-        { k: "B", t: "3, 3", ok: false },
-        { k: "C", t: "3, 2", ok: true },
-        { k: "D", t: "2, 3", ok: false },
+        { k: "A", t: "3", ok: true },
+        { k: "B", t: "2", ok: false },
+        { k: "C", t: "It depends on the names", ok: false },
       ],
-      explain: "COUNT(*) counts all rows. COUNT(name) counts only non-NULL names."
+      explain: "<span class='mono'>COUNT(*)</span> counts every row, no matter what’s inside it."
     },
     {
-      id: "sql_is_null",
+      id: "sql_null",
       topic: "SQL",
-      title: "Finding NULLs (the correct way)",
+      title: "Finding missing values (NULL)",
       prompt: `
-        <div class="text-gray-700 mb-2 font-semibold">Which WHERE clause correctly finds NULL values?</div>
+        <div class="text-gray-700 mb-2 font-semibold">Which WHERE clause finds NULL values?</div>
       `,
-      type: "single",
-      hint: "In SQL: use IS NULL / IS NOT NULL. Equality doesn’t work with NULL.",
+      hint: "In SQL, use <span class='mono'>IS NULL</span> (not equals).",
       options: [
         { k: "A", t: "WHERE col = NULL", ok: false },
-        { k: "B", t: "WHERE col != NULL", ok: false },
-        { k: "C", t: "WHERE col IS NULL", ok: true },
-        { k: "D", t: "WHERE col IN (NULL)", ok: false },
+        { k: "B", t: "WHERE col IS NULL", ok: true },
+        { k: "C", t: "WHERE col == NULL", ok: false },
       ],
-      explain: "Use IS NULL because NULL isn’t equal to anything (it represents unknown)."
+      explain: "NULL means “missing/unknown,” so SQL uses <span class='mono'>IS NULL</span> to test it."
     },
     {
-      id: "sql_not_in",
-      topic: "SQL",
-      title: "NOT IN + NULL = pain",
+      id: "wrap_up",
+      topic: "Wrap-up",
+      title: "What did we learn?",
       prompt: `
-        <div class="text-gray-700 mb-2 font-semibold">Table <span class="mono">t(x)</span> contains values: <span class="mono">1, 2, NULL</span>.</div>
-        <div class="text-gray-700 mb-2 font-semibold">What does this return?</div>
-        <pre class="mono bg-gray-900 text-gray-100 p-4 rounded-xl border border-gray-700 text-sm">
-SELECT 3 NOT IN (SELECT x FROM t);
-        </pre>
+        <div class="text-gray-700 mb-2 font-semibold">Pick the best summary:</div>
       `,
-      type: "single",
-      hint: "If the set contains NULL, SQL can’t be sure. So it returns… uncertainty.",
+      hint: "Think: Python = code, SQL = questions for data. Both have a few rules to remember.",
       options: [
-        { k: "A", t: "TRUE", ok: false },
-        { k: "B", t: "FALSE", ok: false },
-        { k: "C", t: "NULL", ok: true },
-        { k: "D", t: "Error", ok: false },
+        { k: "A", t: "Python is for writing programs; SQL is for asking questions about data.", ok: true },
+        { k: "B", t: "Python and SQL are the same thing.", ok: false },
+        { k: "C", t: "SQL is only for websites; Python is only for math.", ok: false },
       ],
-      explain: "Because NULL makes the result UNKNOWN — SQL won’t say TRUE confidently."
-    },
-
-    // Multi-select “boss”
-    {
-      id: "boss_multi",
-      topic: "Boss Fight",
-      title: "Select all TRUE statements (multi-select required)",
-      prompt: `
-        <div class="text-gray-700 mb-2 font-semibold">
-          Pick <span class="font-bold">all</span> statements that are TRUE.
-          <span class="text-gray-400 text-sm">(Yes, multiple. Yes, the UI is unhelpful.)</span>
-        </div>
-        <div class="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800">
-          <span class="font-bold">Important:</span> multi-select is disabled by default.
-          Please enable it in <span class="mono">settings</span> like a real professional.
-        </div>
-      `,
-      type: "multi",
-      hint: "True facts: COUNT(column) ignores NULL. HAVING filters after GROUP BY. NULL comparisons become UNKNOWN.",
-      options: [
-        { k: "A", t: "`SELECT NULL = NULL;` returns NULL", ok: true },
-        { k: "B", t: "`COUNT(name)` counts rows including NULLs", ok: false },
-        { k: "C", t: "`WHERE col = NULL` finds NULL values", ok: false },
-        { k: "D", t: "`HAVING` filters after grouping", ok: true },
-        { k: "E", t: "`COUNT(*)` counts rows regardless of NULLs", ok: true },
-      ],
-      explain: "Correct: A, D, E. COUNT(name) ignores NULL, WHERE col = NULL doesn’t match NULL, and HAVING applies after grouping."
+      explain: "That’s the big picture: Python builds logic; SQL retrieves/filters data."
     },
   ];
 
-  // ────────────────────────────────────────────────────────────────
-  // State + storage
-  // ────────────────────────────────────────────────────────────────
-  const LS_KEY = "np_ch4_progress_v1";
-
+  // ------------------------------------------------------------
+  // State (simple)
+  // ------------------------------------------------------------
   const state = {
     i: 0,
-    answers: {},  // { [questionId]: { selected: [...] } }
-    hintIndex: 0,
-    multiEnabled: false,
+    answers: {}, // { [id]: "A"/"B"/... }
+    hintShown: false,
+    lockedCorrect: {}, // { [id]: true }
   };
 
-  function load() {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      if (typeof data?.i === "number") state.i = Math.max(0, Math.min(questions.length - 1, data.i));
-      if (data?.answers && typeof data.answers === "object") state.answers = data.answers;
-      if (typeof data?.multiEnabled === "boolean") state.multiEnabled = data.multiEnabled;
-    } catch { /* ignore */ }
-  }
-
-  function save() {
-    localStorage.setItem(LS_KEY, JSON.stringify({
-      i: state.i,
-      answers: state.answers,
-      multiEnabled: state.multiEnabled
-    }));
-  }
-
-  function resetAll() {
-    localStorage.removeItem(LS_KEY);
-    state.i = 0;
-    state.answers = {};
-    state.hintIndex = 0;
-    state.multiEnabled = false;
-  }
-
-  // ────────────────────────────────────────────────────────────────
-  // UI elements
-  // ────────────────────────────────────────────────────────────────
   const el = (id) => document.getElementById(id);
 
   const topicBadge = el("topicBadge");
   const progressLabel = el("progressLabel");
-  const progressSnark = el("progressSnark");
+  const progressNote = el("progressNote");
   const progressBar = el("progressBar");
 
   const qNumber = el("qNumber");
   const qTotal = el("qTotal");
   const qTitle = el("qTitle");
   const qPrompt = el("qPrompt");
-  const options = el("options");
+  const optionsEl = el("options");
   const feedback = el("feedback");
 
   const hintBtn = el("hintBtn");
@@ -495,33 +268,24 @@ SELECT 3 NOT IN (SELECT x FROM t);
   const submitBtn = el("submitBtn");
   const nextBtn = el("nextBtn");
   const prevBtn = el("prevBtn");
+  const resetBtn = el("resetBtn");
 
   const success = el("success");
-  const clueModal = el("clueModal");
-
-  const settingsBtn = el("settingsBtn");
-  const settingsPanel = el("settingsPanel");
-  const enableMultiSelect = el("enableMultiSelect");
-
-  const confirmModal = el("confirmModal");
-  const confirmButtons = el("confirmButtons");
-  const confirmText = el("confirmText");
-
-  // ────────────────────────────────────────────────────────────────
-  // Rendering
-  // ────────────────────────────────────────────────────────────────
-  function lieProgress() {
-    // inaccurate on purpose, but monotonic-ish
-    const answered = Object.keys(state.answers).length;
-    let pct = Math.floor((answered / questions.length) * 100);
-    pct = Math.max(7, Math.min(99, pct + (Math.random() < 0.35 ? -2 : 3)));
-    progressBar.style.width = pct + "%";
-
-    const confidence = ["low", "extremely low", "questionable", "legally undefined", "festive", "unstable"][Math.floor(Math.random()*6)];
-    progressSnark.textContent = `Confidence: ${confidence}`;
-  }
 
   function currentQ() { return questions[state.i]; }
+
+  function updateProgress() {
+    const correctCount = Object.keys(state.lockedCorrect).length;
+    progressLabel.textContent = `Progress: ${correctCount}/${questions.length}`;
+
+    const pct = Math.round((correctCount / questions.length) * 100);
+    progressBar.style.width = pct + "%";
+
+    progressNote.textContent =
+      correctCount === 0 ? "Warm-up ✨" :
+      correctCount < questions.length ? "Nice! Keep going 🎁" :
+      "All done ✅";
+  }
 
   function render() {
     const q = currentQ();
@@ -532,334 +296,146 @@ SELECT 3 NOT IN (SELECT x FROM t);
     qTitle.textContent = q.title;
     qPrompt.innerHTML = q.prompt;
 
-    // progress label (real)
-    const answered = Object.keys(state.answers).length;
-    progressLabel.textContent = `Progress: ${answered}/${questions.length}`;
-    lieProgress();
-
     // hint reset for this question
-    state.hintIndex = 0;
-    hintText.textContent = "";
+    state.hintShown = false;
+    hintText.innerHTML = "";
+    hintBtn.textContent = "Show Hint";
 
     // buttons
     prevBtn.disabled = state.i === 0;
-    prevBtn.classList.toggle("opacity-30", state.i === 0);
+    prevBtn.classList.toggle("opacity-40", state.i === 0);
     prevBtn.classList.toggle("cursor-not-allowed", state.i === 0);
 
     nextBtn.classList.add("hidden");
+
     feedback.classList.add("hidden");
     feedback.className = "hidden mt-4 p-4 rounded-xl border text-sm";
 
-    // render options
-    options.innerHTML = "";
-    const savedSel = (state.answers[q.id]?.selected) || [];
-
-    const multiWanted = q.type === "multi";
-    const useMulti = multiWanted && state.multiEnabled;
-
-    const inputType = useMulti ? "checkbox" : "radio";
-    const name = `q_${q.id}`;
+    // options
+    optionsEl.innerHTML = "";
+    const chosen = state.answers[q.id] || null;
 
     q.options.forEach(opt => {
       const wrap = document.createElement("label");
       wrap.className = "flex items-start gap-3 p-3 rounded-xl border bg-gray-50 hover:bg-gray-100 transition cursor-pointer";
 
       const input = document.createElement("input");
-      input.type = inputType;
-      input.name = name;
+      input.type = "radio";
+      input.name = `q_${q.id}`;
       input.value = opt.k;
       input.className = "mt-1 w-4 h-4";
-      input.checked = savedSel.includes(opt.k);
+      input.checked = chosen === opt.k;
+
+      // If already correct, prevent changing it (optional but keeps flow simple)
+      const locked = !!state.lockedCorrect[q.id];
+      input.disabled = locked;
+      if (locked) wrap.classList.add("opacity-70");
 
       input.addEventListener("change", () => {
-        if (inputType === "radio") {
-          state.answers[q.id] = { selected: [opt.k] };
-        } else {
-          // checkboxes
-          const set = new Set((state.answers[q.id]?.selected) || []);
-          if (input.checked) set.add(opt.k); else set.delete(opt.k);
-          state.answers[q.id] = { selected: [...set] };
-        }
-        save();
+        state.answers[q.id] = opt.k;
       });
 
       const text = document.createElement("div");
       text.className = "text-gray-800 font-semibold";
       text.textContent = `${opt.k}) ${opt.t}`;
 
-      // Bad UI flourish: add a tiny useless “i” button
-      const info = document.createElement("button");
-      info.type = "button";
-      info.className = "tiny ml-auto border rounded text-gray-300 hover:text-gray-600 hover:border-gray-300";
-      info.textContent = "i";
-      info.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toast("Info", "This option contains at least one letter. Verified.");
-      });
-
       wrap.appendChild(input);
       wrap.appendChild(text);
-      wrap.appendChild(info);
-
-      options.appendChild(wrap);
+      optionsEl.appendChild(wrap);
     });
 
-    // multi-select lock hint
-    if (multiWanted && !state.multiEnabled) {
-      toast("Notice", "This question requires multi-select. Please enable it in settings. (Yes, really.)", 1800);
-    }
+    updateProgress();
 
-    // success state
-    if (Object.keys(state.answers).length === questions.length) {
-      // still need all correct to finish, but show “nearly done”
-      // (we'll handle actual completion after validation)
+    // If finished, show success panel
+    if (Object.keys(state.lockedCorrect).length === questions.length) {
+      success.classList.remove("hidden");
+    } else {
+      success.classList.add("hidden");
     }
-
-    save();
   }
 
-  // ────────────────────────────────────────────────────────────────
-  // Hint (reveals one character per click)
-  // ────────────────────────────────────────────────────────────────
   hintBtn.addEventListener("click", () => {
     const q = currentQ();
-    if (!q.hint) return;
+    if (!state.hintShown) {
+      hintText.innerHTML = q.hint || "No hint for this one!";
+      hintBtn.textContent = "Hide Hint";
+      state.hintShown = true;
+    } else {
+      hintText.innerHTML = "";
+      hintBtn.textContent = "Show Hint";
+      state.hintShown = false;
+    }
+  });
 
-    // bad UI: sometimes the hint button pretends to lag
-    if (Math.random() < 0.12) {
-      hintBtn.classList.add("shake");
-      setTimeout(() => hintBtn.classList.remove("shake"), 380);
-      toast("Loading", "Fetching hint from the North Pole mainframe… (0% complete)", 900);
+  function showFeedback(ok, message, explainHtml) {
+    feedback.classList.remove("hidden");
+    feedback.classList.toggle("border-green-200", ok);
+    feedback.classList.toggle("bg-green-50", ok);
+    feedback.classList.toggle("text-green-900", ok);
+
+    feedback.classList.toggle("border-red-200", !ok);
+    feedback.classList.toggle("bg-red-50", !ok);
+    feedback.classList.toggle("text-red-900", !ok);
+
+    feedback.innerHTML = `
+      <div class="font-extrabold">${ok ? "✅ Correct!" : "❌ Not quite."}</div>
+      <div class="mt-1 font-semibold">${escapeHtml(message)}</div>
+      <div class="mt-3 text-sm text-gray-800"><span class="font-bold">Why:</span> ${explainHtml}</div>
+    `;
+  }
+
+  submitBtn.addEventListener("click", () => {
+    const q = currentQ();
+    const chosen = state.answers[q.id];
+
+    if (!chosen) {
+      showFeedback(false, "Pick an answer first 😊", "Choose one option, then click <span class='font-bold'>Check Answer</span>.");
       return;
     }
 
-    if (state.hintIndex < q.hint.length) {
-      hintText.textContent += q.hint[state.hintIndex];
-      state.hintIndex++;
-    } else {
-      toast("Hint", "That’s all you get. Knowledge has been exhausted.", 1200);
-    }
-  });
-
-  // ────────────────────────────────────────────────────────────────
-  // Settings
-  // ────────────────────────────────────────────────────────────────
-  settingsBtn.addEventListener("click", () => {
-    settingsPanel.classList.toggle("hidden");
-  });
-
-  enableMultiSelect.addEventListener("change", () => {
-    state.multiEnabled = enableMultiSelect.checked;
-    save();
-    render();
-  });
-
-  // ────────────────────────────────────────────────────────────────
-  // Validation
-  // ────────────────────────────────────────────────────────────────
-  function validateAnswer(q) {
-    const selected = (state.answers[q.id]?.selected) || [];
-
-    // must choose something
-    if (selected.length === 0) {
-      return { ok: false, msg: "You selected nothing. Bold strategy. Incorrect, but bold." };
-    }
-
-    if (q.type === "multi") {
-      if (!state.multiEnabled) {
-        return { ok: false, msg: "Multi-select is disabled. Please enable it in settings like a responsible adult." };
-      }
-      const correct = q.options.filter(o => o.ok).map(o => o.k).sort();
-      const got = [...selected].sort();
-
-      const equal = correct.length === got.length && correct.every((v, i) => v === got[i]);
-      return equal
-        ? { ok: true, msg: "Correct. You have defeated SQL’s NULL nonsense. Respect." }
-        : { ok: false, msg: "Incorrect. SQL has judged you. Harshly. Try again." };
-    }
-
-    // single-choice
-    const chosen = selected[0];
     const opt = q.options.find(o => o.k === chosen);
-    return opt?.ok
-      ? { ok: true, msg: "Correct. The computer is satisfied. Briefly." }
-      : { ok: false, msg: "Incorrect. Technically, you are wrong. Emotionally, you are right." };
-  }
+    const ok = !!opt?.ok;
 
-  // ────────────────────────────────────────────────────────────────
-  // Confirm modal with swapped buttons
-  // ────────────────────────────────────────────────────────────────
-  function openConfirm(onYes) {
-    confirmModal.classList.remove("hidden");
+    if (ok) {
+      state.lockedCorrect[q.id] = true;
+      showFeedback(true, "You’ve got it.", q.explain);
+      nextBtn.classList.remove("hidden");
 
-    const q = currentQ();
-    confirmText.textContent = (q.type === "multi")
-      ? "You are about to submit MULTIPLE answers. This is considered an extreme sport."
-      : "You are about to submit ONE answer. This is still risky.";
-
-    // Create buttons
-    const yesBtn = document.createElement("button");
-    yesBtn.className = "px-4 py-2 bg-red-600 text-white font-extrabold rounded-lg hover:bg-red-700 transition";
-    yesBtn.textContent = "Yes, submit";
-
-    const noBtn = document.createElement("button");
-    noBtn.className = "px-4 py-2 bg-gray-100 border rounded-lg font-bold text-gray-700 hover:bg-gray-200 transition";
-    noBtn.textContent = "No, go back";
-
-    confirmButtons.innerHTML = "";
-
-    // Randomly swap positions (evil)
-    const swapped = Math.random() < 0.5;
-    if (swapped) {
-      confirmButtons.appendChild(yesBtn);
-      confirmButtons.appendChild(noBtn);
+      // If this was the last question, show success immediately
+      if (Object.keys(state.lockedCorrect).length === questions.length) {
+        success.classList.remove("hidden");
+        nextBtn.classList.add("hidden");
+      }
     } else {
-      confirmButtons.appendChild(noBtn);
-      confirmButtons.appendChild(yesBtn);
+      showFeedback(false, "Try again (hint helps!).", q.explain);
+      nextBtn.classList.add("hidden");
     }
 
-    noBtn.onclick = () => confirmModal.classList.add("hidden");
-    yesBtn.onclick = () => {
-      confirmModal.classList.add("hidden");
-      onYes();
-    };
-  }
-
-  // ────────────────────────────────────────────────────────────────
-  // Submit flow
-  // ────────────────────────────────────────────────────────────────
-  submitBtn.addEventListener("click", () => {
-    openConfirm(() => {
-      const q = currentQ();
-      const res = validateAnswer(q);
-
-      feedback.classList.remove("hidden");
-      feedback.classList.toggle("border-green-200", res.ok);
-      feedback.classList.toggle("bg-green-50", res.ok);
-      feedback.classList.toggle("text-green-800", res.ok);
-
-      feedback.classList.toggle("border-red-200", !res.ok);
-      feedback.classList.toggle("bg-red-50", !res.ok);
-      feedback.classList.toggle("text-red-800", !res.ok);
-
-      const expl = q.explain ? `<div class="mt-2 text-sm text-gray-700"><span class="font-bold">Why:</span> ${escapeHtml(q.explain)}</div>` : "";
-      const snark = res.ok
-        ? "✅ <span class='font-bold'>Correct.</span> Computers remain chaotic, but you’re adapting."
-        : "❌ <span class='font-bold'>Incorrect.</span> The computer would like to speak to your manager.";
-
-      feedback.innerHTML = `
-        <div>${snark}</div>
-        <div class="mt-1 font-semibold">${escapeHtml(res.msg)}</div>
-        ${expl}
-      `;
-
-      if (res.ok) {
-        nextBtn.classList.remove("hidden");
-        // lock in answer (already stored)
-        // also: lightly “reward” with micro-toast
-        toast("Unlocked", "Proceed to the next questionable decision.", 900);
-      } else {
-        // bad UI: tiny punishment—erase 1 hint char sometimes
-        if (hintText.textContent.length > 0 && Math.random() < 0.25) {
-          hintText.textContent = hintText.textContent.slice(0, -1);
-          toast("Penalty", "Hint integrity compromised. Please try again.", 900);
-        }
-      }
-    });
+    updateProgress();
   });
 
   nextBtn.addEventListener("click", () => {
-    // Move forward
     if (state.i < questions.length - 1) {
       state.i++;
-      save();
       render();
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      // end
-      tryFinish();
     }
   });
 
   prevBtn.addEventListener("click", () => {
     if (state.i === 0) return;
     state.i--;
-    save();
     render();
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
-  // ────────────────────────────────────────────────────────────────
-  // Completion check: all questions answered AND all correct
-  // ────────────────────────────────────────────────────────────────
-  function tryFinish() {
-    // Must be correct on ALL questions
-    for (const q of questions) {
-      const res = validateAnswer(q);
-      if (!res.ok) {
-        // jump to first failing question
-        const idx = questions.findIndex(qq => qq.id === q.id);
-        state.i = Math.max(0, idx);
-        save();
-        render();
-        toast("Not yet", "One or more answers are still wrong. The computer requires perfection.", 1600);
-        return;
-      }
-    }
-
-    // Success
-    success.classList.remove("hidden");
-    submitBtn.disabled = true;
-    submitBtn.classList.add("opacity-40", "cursor-not-allowed");
-    nextBtn.classList.add("hidden");
-    toast("Victory", "You have achieved the rare state of Being Correct™", 1400);
-
-    // Scroll to victory button
-    setTimeout(() => {
-      success.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 150);
-  }
-
-  success.addEventListener("click", () => {
-    clueModal.classList.remove("hidden");
-  });
-
-  // ────────────────────────────────────────────────────────────────
-  // Reset
-  // ────────────────────────────────────────────────────────────────
-  el("resetProgressBtn").addEventListener("click", () => {
-    // extra annoying: confirm and shame
-    openConfirm(() => {
-      resetAll();
-      enableMultiSelect.checked = false;
-      toast("Reset", "Progress wiped. The elves are laughing.", 1200);
-      render();
-    });
-  });
-
-  el("resetProgressBtn").addEventListener("click", () => {
-    resetAll();
-    enableMultiSelect.checked = false;
+  resetBtn.addEventListener("click", () => {
+    state.i = 0;
+    state.answers = {};
+    state.lockedCorrect = {};
+    state.hintShown = false;
     render();
   });
-
-  // ────────────────────────────────────────────────────────────────
-  // Toast (tiny, obnoxious)
-  // ────────────────────────────────────────────────────────────────
-  let toastEl = null;
-  function toast(title, msg, ms = 1100) {
-    if (toastEl) toastEl.remove();
-    toastEl = document.createElement("div");
-    toastEl.className = "fixed bottom-4 right-4 z-50 bg-white border shadow-xl rounded-xl p-4 max-w-sm pop";
-    toastEl.innerHTML = `
-      <div class="text-sm font-extrabold text-gray-800">${escapeHtml(title)}</div>
-      <div class="text-sm text-gray-600 mt-1">${escapeHtml(msg)}</div>
-      <div class="mt-2 text-[11px] text-gray-400">This message will self-destruct (unlike your mistakes).</div>
-    `;
-    document.body.appendChild(toastEl);
-    setTimeout(() => { if (toastEl) toastEl.remove(); toastEl = null; }, ms);
-  }
 
   function escapeHtml(s) {
     return String(s)
@@ -870,18 +446,7 @@ SELECT 3 NOT IN (SELECT x FROM t);
       .replaceAll("'", "&#039;");
   }
 
-  // ────────────────────────────────────────────────────────────────
-  // Init
-  // ────────────────────────────────────────────────────────────────
-  load();
-  enableMultiSelect.checked = state.multiEnabled;
   render();
-
-  // If they're on last question and hit refresh, try finishing after render
-  // (bad UI but helpful)
-  setTimeout(() => {
-    if (state.i === questions.length - 1) tryFinish();
-  }, 50);
 </script>
 </body>
 </html>
